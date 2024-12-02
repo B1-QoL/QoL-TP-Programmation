@@ -2,6 +2,7 @@
 ## Description :
 Comprends :
   - Une fonction C# d'affichage.
+  - **WIP** une fonction de création de l'archi à partir du sujet
 
 ## Installation de la bibliothèque C# :
 1) Télécharger b1.dll ;
