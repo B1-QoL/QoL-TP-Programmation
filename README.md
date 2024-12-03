@@ -1,6 +1,6 @@
 # Bibliothèque de fonctions facilitant les travaux pratiques de programmation.
 ## Description :
-Comprends :
+Comprend :
   - Une fonction C# d'affichage.
 
 ## Installation de la bibliothèque C# :
