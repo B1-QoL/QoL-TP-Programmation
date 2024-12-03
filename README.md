@@ -6,7 +6,7 @@ Comprends :
 ## Installation de la bibliothèque C# :
 1) Télécharger b1.dll ;
 2) Ouvrir son IDE puis son projet ;
-3) Ajouter une référence à b1.dll en faisant un clique droit sur "References" puis en cliquant sur "Add" ;
+3) Ajouter une référence à b1.dll en faisant un clique droit sur "Dependencies" puis en cliquant sur "Add" ;
 4) Ajouter ```using static B1.Affichage;``` dans Programme.cs.
 
 **ATTENTION : NE PAS INCLURE LA BIBLIOTHEQUE DANS LES AUTRES FICHIERS !**\
