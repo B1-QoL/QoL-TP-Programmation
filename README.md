@@ -11,7 +11,7 @@ Comprend :
    ```git checkout```
 3) Ouvrir son IDE puis son projet ;
 4) Ajouter une référence à bin/B1.dll en faisant un clique droit sur "Dependencies" puis en cliquant sur "Reference..." ;
-5) Ajouter ```using static B1.Affichage;``` dans Programme.cs.
+5) Ajouter ```using static B1.Affichage;``` dans les fichiers où vous en avez besoin.
 
-**ATTENTION : NE PAS INCLURE LA BIBLIOTHEQUE DANS LES AUTRES FICHIERS !**\
+**ATTENTION : NE PAS OUBLIER D'EN RETIRER TOUTE MENTION AVANT DE SOUMETTRE !**\
 La moulinette ne vous autorisera pas leur utilisation.
