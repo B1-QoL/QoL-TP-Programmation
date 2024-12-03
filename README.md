@@ -14,4 +14,4 @@ Comprend :
 5) Ajouter ```using static B1.Affichage;``` dans les fichiers où vous en avez besoin.
 
 **ATTENTION : NE PAS OUBLIER D'EN RETIRER TOUTE MENTION AVANT DE SOUMETTRE !**\
-La moulinette ne vous autorisera pas leur utilisation.
+La moulinette ne vous autorisera pas son utilisation.
