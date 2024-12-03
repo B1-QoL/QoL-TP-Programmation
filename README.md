@@ -4,7 +4,7 @@ Comprends :
   - Une fonction C# d'affichage.
 
 ## Installation de la bibliothèque C# :
-1) Télécharger le dossier bin :
+1) Télécharger le dossier bin :<br />
    ```git clone -n --depth=1 --filter=tree:0 https://github.com/B1-QoL/QoL-TP-Programmation.git```<br />
    ```cd QoL-TP-Programmation```<br />
    ```git sparse-checkout set --no-cone /bin```<br />
