@@ -17,7 +17,7 @@
              tuple => () ;
              </item>
              <item>
-             éléments d'un dictionnaire => [] ;
+             élément d'un dictionnaire => [] ;
              </item>
              <item>
              pour tout le reste => {}.
