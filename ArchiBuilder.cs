@@ -4,27 +4,31 @@ public class ArchiBuilder
 {
     public static int Main(string[] args)
     {
-        // Ajouter une aide si la commande est mal utilisée.
-        BuildTree("epita-prepa-computer-science-prog-102-p-04-2029-firstname.lastname\n\u251c\u2500\u2500 ObelixAndCo\n\u2502   \u251c\u2500\u2500 Cells\n\u2502   \u2502   \u251c\u2500\u2500 Cell.cs\n\u2502   \u2502   \u251c\u2500\u2500 Forest.cs\n\u2502   \u2502   \u251c\u2500\u2500 Hut.cs\n\u2502   \u2502   \u251c\u2500\u2500 Pond.cs\n\u2502   \u2502   \u2514\u2500\u2500 Quarry.cs\n\u2502   \u251c\u2500\u2500 People\n\u2502   \u2502   \u251c\u2500\u2500 Fisher.cs\n\u2502   \u2502   \u251c\u2500\u2500 Hunter.cs\n\u2502   \u2502   \u251c\u2500\u2500 Person.cs\n\u2502   \u2502   \u2514\u2500\u2500 Sculptor.cs\n\u2502   \u251c\u2500\u2500 Grid.cs\n\u2502   \u251c\u2500\u2500 IoManager.cs\n\u2502   \u251c\u2500\u2500 ObelixAndCo.csproj\n\u2502   \u251c\u2500\u2500 Program.cs\n\u2502   \u251c\u2500\u2500 RandomPrice.cs\n\u2502   \u2514\u2500\u2500 Utils.cs\n\u251c\u2500\u2500 Tests\n\u2502   \u2514\u2500\u2500 Insert your Tests files\n\u251c\u2500\u2500 .gitignore\n\u251c\u2500\u2500 ObelixAndCo.sln\n\u2514\u2500\u2500 README\n");
+        if(args.Length != 1) // L'appel ne doit contenir que le lien du site.
+        {
+            // Message d'erreur
+            return 1;
+        }
+
+        if(!args[0].StartWith(@"https://intra.forge.epita.fr/epita-prepa-computer-science/")
+        {
+            // Message d'erreur
+            return 2;
+        }
+
+        string pageCode = GetWebsiteCode(args[0]);
+        Dictionnary<string, string[]> balises = ParsePage(pageCode);
+        
+        // BuildTree("epita-prepa-computer-science-prog-102-p-04-2029-firstname.lastname\n\u251c\u2500\u2500 ObelixAndCo\n\u2502   \u251c\u2500\u2500 Cells\n\u2502   \u2502   \u251c\u2500\u2500 Cell.cs\n\u2502   \u2502   \u251c\u2500\u2500 Forest.cs\n\u2502   \u2502   \u251c\u2500\u2500 Hut.cs\n\u2502   \u2502   \u251c\u2500\u2500 Pond.cs\n\u2502   \u2502   \u2514\u2500\u2500 Quarry.cs\n\u2502   \u251c\u2500\u2500 People\n\u2502   \u2502   \u251c\u2500\u2500 Fisher.cs\n\u2502   \u2502   \u251c\u2500\u2500 Hunter.cs\n\u2502   \u2502   \u251c\u2500\u2500 Person.cs\n\u2502   \u2502   \u2514\u2500\u2500 Sculptor.cs\n\u2502   \u251c\u2500\u2500 Grid.cs\n\u2502   \u251c\u2500\u2500 IoManager.cs\n\u2502   \u251c\u2500\u2500 ObelixAndCo.csproj\n\u2502   \u251c\u2500\u2500 Program.cs\n\u2502   \u251c\u2500\u2500 RandomPrice.cs\n\u2502   \u2514\u2500\u2500 Utils.cs\n\u251c\u2500\u2500 Tests\n\u2502   \u2514\u2500\u2500 Insert your Tests files\n\u251c\u2500\u2500 .gitignore\n\u251c\u2500\u2500 ObelixAndCo.sln\n\u2514\u2500\u2500 README\n");
         return 0;
     }
 
     private readonly HttpClient _client = new();
     
-    // ???
-    private void GetSubjectCode(string url, string token) 
+    // Traiter le cas où demande de mot de passe.
+    private static string GetWebsiteCode(string url) 
     {
-        _client.DefaultRequestHeaders.Add("Authorization", $"Bearer <{token}>");
-
-        var request = _client.GetAsync(url);
-
-        request.Wait();
-
-        HttpResponseMessage requestResult = request.Result;
-
-        string response = requestResult.Content.ReadAsStringAsync().Result;
-
-        Console.WriteLine(response);
+        return await _client.GetStringAsync(url);
     }
 
     /// <summary>
@@ -172,7 +176,28 @@ public class ArchiBuilder
         
         return (unknownFiles, fileAlreadyExists);
     }
-    
+
+    private static Dictionnary<string, string[]> ParsePage(string pageCode)
+    {
+        Dictionnary<string, string[]> balises = new();
+        string[] pageArray = pageCode.Split('\n');
+        
+        foreach (string line in pageArray)
+        {
+            if(line.Contains("@git.forge.epita.fr"))
+            {
+                string[] gitRepoLine = line.Split('"');
+                foreach(string part in gitRepoLine)
+                {
+                    if(part.Contains("@git.forge.epita.fr"))
+                        balises.Add("repoLink", new string[](part))
+                }
+            }
+        }
+
+        return balises;
+    }
+        
     private static void WriteFiles()
     {
         
