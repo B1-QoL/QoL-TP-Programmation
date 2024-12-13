@@ -1,4 +1,10 @@
 ﻿// See https://aka.ms/new-console-template for more information
+
+using System.Diagnostics;
+using System.Net;
+using System.Text;
+using System.Xml.XPath;
+
 namespace B1.ArchiBuilder;
 
 public class ArchiBuilder 
@@ -20,11 +26,18 @@ public class ArchiBuilder
          Dictionary<string, string[]> balises = ParsePage(pageCode);
 
          if (!balises.ContainsKey("tree")) { // Ne contient pas de tree reconnu
+             // Message d'erreur
              return 3;
          }
          
          if (!balises.ContainsKey("repoLink")) { // Ne contient pas de lien repo reconnu
-             return 3;
+             // Message d'erreur
+             return 4;
+         }
+         
+         if (!balises.ContainsKey("shellCommands")) { // Ne contient pas de commandes de creation des sln et .csproj
+             // Message d'erreur
+             return 4;
          }
          
          var res = BuildTree(balises["tree"][0]);
@@ -44,6 +57,8 @@ public class ArchiBuilder
                  Console.WriteLine("    ·" + file);
              }
          }
+
+         // Console.WriteLine(RunCommandWithBash("git clone thomas.bobee@git.forge.epita.fr:p/epita-prepa-computer-science/prog-102-p-04-2029/epita-prepa-computer-science-prog-102-p-04-2029-thomas.bobee.git"));  // creates the sln 
          
          // tout c'est bien passe (mettre un e accent aigu)
          return 0;
@@ -52,9 +67,11 @@ public class ArchiBuilder
     private static readonly HttpClient _client = new();
     
     // Traiter le cas où demande de mot de passe.
-    private static string GetWebsiteCode(string url) 
-    {
-        return _client.GetStringAsync(url).Result;
+    private static string GetWebsiteCode(string url) {
+
+        throw new NotImplementedException("");
+        // return _client.GetStringAsync(url).Result;
+        return "test";
     }
 
     /// <summary>
@@ -206,6 +223,11 @@ public class ArchiBuilder
         return (unknownFiles, alreadyFoundFiles); // fileAlreadyExists);
     }
 
+    /// <summary>
+    /// retourne le dictionnaire avec le contenu requis pour faire l'arborescence
+    /// </summary>
+    /// <param name="pageCode">le code de la page</param>
+    /// <returns>Un dictoinnaire avec les cle: "repoLink", "tree" et "shellCommands"</returns>
     private static Dictionary<string, string[]> ParsePage(string pageCode)
     {
         Dictionary<string, string[]> balises = new();
@@ -213,7 +235,7 @@ public class ArchiBuilder
         
         foreach (string line in pageArray)
         {
-            if(line.Contains("@git.forge.epita.fr"))
+            if(line.Contains("@git.forge.epita.fr")) // repo
             {
                 string[] gitRepoLine = line.Split('"');
                 foreach(string part in gitRepoLine) {
@@ -221,7 +243,7 @@ public class ArchiBuilder
                         balises.Add("repoLink", new string[]{part});
                 }
             } 
-            else if (line.Contains("<code") && line.Contains("epita-perpa-computer-science") && line.Contains("\u251c\u2500")) {
+            else if (line.Contains("<code") && line.Contains("epita-perpa-computer-science") && line.Contains("\u251c\u2500")) { // tree
                 string[] treeLine = line.Split(">");
                 foreach (var part in treeLine) {
                     if (part.Contains("epita-perpa-computer-science") && part.Contains("\u251c\u2500")) {
@@ -230,14 +252,50 @@ public class ArchiBuilder
                         balises.Add("tree", new string[] { tree });
                     }
                 }
+            } else if (line.Contains("<code") && line.Contains("dotnet new sln")) { // commands
+                string[] slnLine = line.Split(">")[3..];  // les trois premiers splits ne sont pas utiles
+                string commands = ""; // les trois commandes a executer
+                foreach (var part in slnLine) {
+                    if (part.Contains("dotnet new sln"))
+                        commands += part + "\n";
+                    else if (part.Contains("dotnet new console"))
+                        commands += part + "\n";
+                    else if (part.Contains("dotnet sln add"))
+                        commands += part + "\n";
+                }
+                
+                balises.Add("shellCommands", new string[] { commands });
             }
         }
 
         return balises;
     }
         
-    private static void WriteFiles()
+    private static void WriteFiles(List<string> files)
     {
         
+    }
+    
+    /// <summary>
+    /// Execute une commande avec /bin/sh
+    /// </summary>
+    /// <param name="command">la commade a executer</param>
+    /// <returns>l'output de la commande</returns>
+    private static string RunCommandWithBash(string command)
+    {
+        var psi = new ProcessStartInfo();
+        psi.FileName = "/bin/sh";
+        psi.Arguments = $"-c \"{command}\"";
+        psi.RedirectStandardOutput = true;
+        psi.UseShellExecute = false;
+        psi.CreateNoWindow = true;
+
+        using var process = Process.Start(psi);
+
+        process.WaitForExit();
+
+        var output = process.StandardOutput.ReadToEnd();
+
+        return output;
     }
 }
