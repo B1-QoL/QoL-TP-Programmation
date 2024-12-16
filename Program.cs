@@ -298,4 +298,33 @@ public class ArchiBuilder
 
         return output;
     }
+
+    // Code généré par IA, à tester
+    private static async Task FillForm(string url, Dictionary<string, string> formData)
+    {
+        using (HttpClient client = new HttpClient())
+        {
+            // Step 1: Send a GET request to retrieve the form
+            HttpResponseMessage getResponse = await client.GetAsync(url);
+            getResponse.EnsureSuccessStatusCode();
+            string formHtml = await getResponse.Content.ReadAsStringAsync();
+
+            // Step 2: Parse the form to extract necessary information
+            // This step is highly dependent on the specific form and website structure
+            // For simplicity, we'll assume the form action URL is the same as the form URL
+            // and that there are no hidden fields or additional requirements.
+
+            // Step 3: Create a POST request with the form data
+            var content = new FormUrlEncodedContent(formData);
+
+            // Step 4: Send the POST request to submit the form
+            HttpResponseMessage postResponse = await client.PostAsync(url, content);
+            postResponse.EnsureSuccessStatusCode();
+            string responseBody = await postResponse.Content.ReadAsStringAsync();
+
+            Console.WriteLine("Form submitted successfully.");
+            Console.WriteLine("Response:");
+            Console.WriteLine(responseBody);
+        }
+    }
 }
