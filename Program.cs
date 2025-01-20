@@ -94,9 +94,9 @@ public class ArchiBuilder
 }
 
 
-private class Writting : ArchiBuilder
+private class Writing : ArchiBuilder
 {
-    private static int Writting(<string,string[]> balises)
+    private static int Writing(<string,string[]> balises)
     {
         (List<string> unknownFiles, List<string> alreadyFoundFiles) = BuildTree(balises[tree][0]);
 
@@ -130,7 +130,7 @@ private class Writting : ArchiBuilder
     }
 }
 
-private sealed class BuildTree : Writting 
+private sealed class BuildTree : Writing 
 {
     /// <summary>
     /// Renvoie le nom du fichier ou dossier de la ligne dans l'arborescence. Plus précisément, c'est la fin de la chaîne de charactères <c>line</c> à partir de la première lettre trouvée qui est renvoyée.
