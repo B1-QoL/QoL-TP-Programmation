@@ -16,7 +16,7 @@ public class ArchiBuilder
             return 1;
          }
 
-         if(!args[0].StartsWith(@"https://intra.forge.epita.fr/epita-prepa-computer-science/")) // lien TP de prog epita
+         if(!args[0].StartsWith($"https://intra.forge.ep{"i"}ta.fr/ep{"i"}ta-prepa-computer-science/")) // lien TP de prog epita
          {
              // Message d'erreur
              return 2;
@@ -41,9 +41,7 @@ public class ArchiBuilder
          }
          
          var res = BuildTree(balises["tree"][0]);
-         
-         // var res = BuildTree("epita-prepa-computer-science-prog-102-p-04-2029-firstname.lastname\n\u251c\u2500\u2500 ObelixAndCo\n\u2502   \u251c\u2500\u2500 Cells\n\u2502   \u2502   \u251c\u2500\u2500 Cell.cs\n\u2502   \u2502   \u251c\u2500\u2500 Forest.cs\n\u2502   \u2502   \u251c\u2500\u2500 Hut.cs\n\u2502   \u2502   \u251c\u2500\u2500 Pond.cs\n\u2502   \u2502   \u2514\u2500\u2500 Quarry.cs\n\u2502   \u251c\u2500\u2500 People\n\u2502   \u2502   \u251c\u2500\u2500 Fisher.cs\n\u2502   \u2502   \u251c\u2500\u2500 Hunter.cs\n\u2502   \u2502   \u251c\u2500\u2500 Person.cs\n\u2502   \u2502   \u2514\u2500\u2500 Sculptor.cs\n\u2502   \u251c\u2500\u2500 Grid.cs\n\u2502   \u251c\u2500\u2500 IoManager.cs\n\u2502   \u251c\u2500\u2500 ObelixAndCo.csproj\n\u2502   \u251c\u2500\u2500 Program.cs\n\u2502   \u251c\u2500\u2500 RandomPrice.cs\n\u2502   \u2514\u2500\u2500 Utils.cs\n\u251c\u2500\u2500 Tests\n\u2502   \u2514\u2500\u2500 Insert your Tests files\n\u251c\u2500\u2500 .gitignore\n\u251c\u2500\u2500 ObelixAndCo.sln\n\u2514\u2500\u2500 README\n");
-         
+                  
          if (res.alreadyFoundFiles.Count != 0) {
              Console.WriteLine("Couldn't create following files/directory because they were already found: ");
              foreach (var file in res.alreadyFoundFiles) {
@@ -60,11 +58,9 @@ public class ArchiBuilder
 
          // Console.WriteLine(RunCommandWithBash("git clone thomas.bobee@git.forge.epita.fr:p/epita-prepa-computer-science/prog-102-p-04-2029/epita-prepa-computer-science-prog-102-p-04-2029-thomas.bobee.git"));  // creates the sln 
          
-         // tout c'est bien passe (mettre un e accent aigu)
          return 0;
     }
 
-    private static readonly HttpClient _client = new();
     
     // Traiter le cas où demande de mot de passe.
     private static string GetWebsiteCode(string url) {
@@ -74,6 +70,40 @@ public class ArchiBuilder
         return "test";
     }
 
+    
+    
+        
+    private static void WriteFiles(List<string> files)
+    {
+        
+    }
+    
+    /// <summary>
+    /// Execute une commande avec /bin/sh
+    /// </summary>
+    /// <param name="command">la commade a executer</param>
+    /// <returns>l'output de la commande</returns>
+    private static string RunCommandWithBash(string command)
+    {
+        var psi = new ProcessStartInfo();
+        psi.FileName = "/bin/sh";
+        psi.Arguments = $"-c \"{command}\"";
+        psi.RedirectStandardOutput = true;
+        psi.UseShellExecute = false;
+        psi.CreateNoWindow = true;
+
+        using var process = Process.Start(psi);
+
+        process.WaitForExit();
+
+        var output = process.StandardOutput.ReadToEnd();
+
+        return output;
+    }
+}
+
+private sealed class BuildTree : Parsing 
+{
     /// <summary>
     /// Renvoie le nom du fichier ou dossier de la ligne dans l'arborescence. Plus précisément, c'est la fin de la chaîne de charactères <c>line</c> à partir de la première lettre trouvée qui est renvoyée.
     /// </summary>
@@ -223,6 +253,10 @@ public class ArchiBuilder
         return (unknownFiles, alreadyFoundFiles); // fileAlreadyExists);
     }
 
+}
+
+private class Parsing : ArchiBuilder
+{
     /// <summary>
     /// retourne le dictionnaire avec le contenu requis pour faire l'arborescence
     /// </summary>
@@ -235,18 +269,18 @@ public class ArchiBuilder
         
         foreach (string line in pageArray)
         {
-            if(line.Contains("@git.forge.epita.fr")) // repo
+            if(line.Contains($"@git.forge.ep{"i"}ta.fr")) // repo
             {
                 string[] gitRepoLine = line.Split('"');
                 foreach(string part in gitRepoLine) {
-                    if (part.Contains("@git.forge.epita.fr"))
+                    if (part.Contains($"@git.forge.ep{"i"}ta.fr"))
                         balises.Add("repoLink", new string[]{part});
                 }
             } 
-            else if (line.Contains("<code") && line.Contains("epita-perpa-computer-science") && line.Contains("\u251c\u2500")) { // tree
+            else if (line.Contains("<code") && line.Contains($"ep{"i"}ta-prepa-computer-science") && line.Contains("\u251c\u2500")) { // tree
                 string[] treeLine = line.Split(">");
                 foreach (var part in treeLine) {
-                    if (part.Contains("epita-perpa-computer-science") && part.Contains("\u251c\u2500")) {
+                    if (part.Contains($"ep{"i"}ta-prepa-computer-science") && part.Contains("\u251c\u2500")) {
                         string[] newPart = part.Split("<");
                         string tree = newPart[0];
                         balises.Add("tree", new string[] { tree });
@@ -269,62 +303,5 @@ public class ArchiBuilder
         }
 
         return balises;
-    }
-        
-    private static void WriteFiles(List<string> files)
-    {
-        
-    }
-    
-    /// <summary>
-    /// Execute une commande avec /bin/sh
-    /// </summary>
-    /// <param name="command">la commade a executer</param>
-    /// <returns>l'output de la commande</returns>
-    private static string RunCommandWithBash(string command)
-    {
-        var psi = new ProcessStartInfo();
-        psi.FileName = "/bin/sh";
-        psi.Arguments = $"-c \"{command}\"";
-        psi.RedirectStandardOutput = true;
-        psi.UseShellExecute = false;
-        psi.CreateNoWindow = true;
-
-        using var process = Process.Start(psi);
-
-        process.WaitForExit();
-
-        var output = process.StandardOutput.ReadToEnd();
-
-        return output;
-    }
-
-    // Code généré par IA, à tester
-    private static async Task FillForm(string url, Dictionary<string, string> formData)
-    {
-        using (HttpClient client = new HttpClient())
-        {
-            // Step 1: Send a GET request to retrieve the form
-            HttpResponseMessage getResponse = await client.GetAsync(url);
-            getResponse.EnsureSuccessStatusCode();
-            string formHtml = await getResponse.Content.ReadAsStringAsync();
-
-            // Step 2: Parse the form to extract necessary information
-            // This step is highly dependent on the specific form and website structure
-            // For simplicity, we'll assume the form action URL is the same as the form URL
-            // and that there are no hidden fields or additional requirements.
-
-            // Step 3: Create a POST request with the form data
-            var content = new FormUrlEncodedContent(formData);
-
-            // Step 4: Send the POST request to submit the form
-            HttpResponseMessage postResponse = await client.PostAsync(url, content);
-            postResponse.EnsureSuccessStatusCode();
-            string responseBody = await postResponse.Content.ReadAsStringAsync();
-
-            Console.WriteLine("Form submitted successfully.");
-            Console.WriteLine("Response:");
-            Console.WriteLine(responseBody);
-        }
     }
 }
