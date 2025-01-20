@@ -93,7 +93,44 @@ public class ArchiBuilder
     }
 }
 
-private sealed class BuildTree : Parsing 
+
+private class Writting : ArchiBuilder
+{
+    private static int Writting(<string,string[]> balises)
+    {
+        (List<string> unknownFiles, List<string> alreadyFoundFiles) = BuildTree(balises[tree][0]);
+
+        if (alreadyFoundFiles.Lenght != 0)
+        {
+            Console.WriteLine("Certains fichiers existent déjà. Souhaitez-vous les modifier ? (o/n)");
+            
+            foreach (string file in alreadyFoundFiles)
+            {
+                Console.Write($"{file} : ");
+                if (Console.ReadKey() == 'o')
+                    // Remove le fichier de la liste des fichiers à modifier
+            }
+        }
+
+
+        if(unknownFiles.Lenght != 0)
+        {
+            Console.WriteLine("Certains fichiers n'ont pas été reconnus et ont été ignorés :");
+            
+            foreach(string file in unknownFiles)
+            {
+                Console.WriteLine($"\t{file}");
+            }
+            
+            Console.WriteLine();
+            return 1;
+        }
+
+        return 0;
+    }
+}
+
+private sealed class BuildTree : Writting 
 {
     /// <summary>
     /// Renvoie le nom du fichier ou dossier de la ligne dans l'arborescence. Plus précisément, c'est la fin de la chaîne de charactères <c>line</c> à partir de la première lettre trouvée qui est renvoyée.
@@ -144,7 +181,6 @@ private sealed class BuildTree : Parsing
     {
         List<string> unknownFiles = new List<string>();
         List<string> alreadyFoundFiles = new List<string>();
-        // bool fileAlreadyExists = false;
         Stack<(string, int)> folderStack = new ();
 
         string[] treeArray = tree.Split('\n');
@@ -246,7 +282,7 @@ private sealed class BuildTree : Parsing
 
 }
 
-private class Parsing : ArchiBuilder
+private sealed class Parsing : ArchiBuilder
 {
     /// <summary>
     /// retourne le dictionnaire avec le contenu requis pour faire l'arborescence
