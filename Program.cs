@@ -13,48 +13,71 @@ public class ArchiBuilder
     {
          if(args.Length != 1) { // L'appel ne doit contenir que le lien du site.
             // Message d'erreur
-            return 1;
+            return 1; // Erreurs sur les paramètres d'appel.
          }
 
-         if(!args[0].StartsWith($"https://intra.forge.ep{"i"}ta.fr/ep{"i"}ta-prepa-computer-science/")) // lien TP de prog epita
+         if(!args[0].StartsWith($"https://intra.forge.ep{"i"}ta.fr/ep{"i"}ta-prepa-computer-science/"))
          {
              // Message d'erreur
-             return 2;
+             return 2; // Lien invalide.
          }
 
          string pageCode = GetWebsiteCode(args[0]);
          Dictionary<string, string[]> balises = ParsePage(pageCode);
 
-         if (!balises.ContainsKey("tree")) { // Ne contient pas de tree reconnu
+        if (!balises.ContainsKey("repoLink")) 
+         {
              // Message d'erreur
-             return 3;
+             return 3; // Pas de lien de dépos git reconnu.
          }
-         
-         if (!balises.ContainsKey("repoLink")) { // Ne contient pas de lien repo reconnu
+
+        if (!balises.ContainsKey("shellCommands")) 
+        {
              // Message d'erreur
-             return 4;
-         }
-         
-         if (!balises.ContainsKey("shellCommands")) { // Ne contient pas de commandes de creation des sln et .csproj
+             return 4; // Aucune commande de création de projet reconnue.
+        }
+        
+         if (!balises.ContainsKey("tree")) 
+         { 
              // Message d'erreur
-             return 4;
+             return 5; // Aucune arborescence de fichiers détectée.
          }
+
+        RunCommandWithBash($"git clone {repoLink}"); // Traiter le cas problème
+
+        foreach(string command in shellCommands)
+        {
+            RunCommandWithBash(command); // Traiter le cas problème
+        }
          
-         var res = BuildTree(balises["tree"][0]);
-                  
-         if (res.alreadyFoundFiles.Count != 0) {
-             Console.WriteLine("Couldn't create following files/directory because they were already found: ");
-             foreach (var file in res.alreadyFoundFiles) {
-                 Console.WriteLine("    ·" + file);
-             }
-         }
-         
-         if (res.unknownFiles.Count != 0) {
-             Console.WriteLine("Couldn't create following files because they were of unknown extension: ");
-             foreach (var file in res.unknownFiles) {
-                 Console.WriteLine("    ·" + file);
-             }
-         }
+        (List<string> unknownFiles, List<string> alreadyFoundFiles) = BuildTree(balises["tree"][0]);
+
+        if (alreadyFoundFiles.Lenght != 0)
+        {
+            Console.WriteLine("Certains fichiers existent déjà. Souhaitez-vous les modifier ? (o/n)");
+            
+            foreach (string file in alreadyFoundFiles)
+            {
+                Console.Write($"{file} : ");
+                if (Console.ReadKey() == 'o')
+                    // Remove le fichier de la liste des fichiers à modifier
+            }
+        }
+
+
+        if(unknownFiles.Lenght != 0)
+        {
+            Console.WriteLine("Certains fichiers n'ont pas été reconnus et ont été ignorés :");
+            
+            foreach(string file in unknownFiles)
+            {
+                Console.WriteLine($"\t· {file}");
+            }
+            
+            Console.WriteLine();
+            return 1;
+        }
+
 
          // Console.WriteLine(RunCommandWithBash("git clone thomas.bobee@git.forge.epita.fr:p/epita-prepa-computer-science/prog-102-p-04-2029/epita-prepa-computer-science-prog-102-p-04-2029-thomas.bobee.git"));  // creates the sln 
          
@@ -100,31 +123,7 @@ private class Writing : ArchiBuilder
     {
         (List<string> unknownFiles, List<string> alreadyFoundFiles) = BuildTree(balises[tree][0]);
 
-        if (alreadyFoundFiles.Lenght != 0)
-        {
-            Console.WriteLine("Certains fichiers existent déjà. Souhaitez-vous les modifier ? (o/n)");
-            
-            foreach (string file in alreadyFoundFiles)
-            {
-                Console.Write($"{file} : ");
-                if (Console.ReadKey() == 'o')
-                    // Remove le fichier de la liste des fichiers à modifier
-            }
-        }
-
-
-        if(unknownFiles.Lenght != 0)
-        {
-            Console.WriteLine("Certains fichiers n'ont pas été reconnus et ont été ignorés :");
-            
-            foreach(string file in unknownFiles)
-            {
-                Console.WriteLine($"\t{file}");
-            }
-            
-            Console.WriteLine();
-            return 1;
-        }
+        
 
         return 0;
     }
