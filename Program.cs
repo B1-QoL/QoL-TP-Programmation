@@ -60,22 +60,13 @@ public class ArchiBuilder
          
          return 0;
     }
-
     
     // Traiter le cas où demande de mot de passe.
-    private static string GetWebsiteCode(string url) {
-
+    private static string GetWebsiteCode(string url) 
+    {
         throw new NotImplementedException("");
         // return _client.GetStringAsync(url).Result;
         return "test";
-    }
-
-    
-    
-        
-    private static void WriteFiles(List<string> files)
-    {
-        
     }
     
     /// <summary>
@@ -269,27 +260,34 @@ private class Parsing : ArchiBuilder
         
         foreach (string line in pageArray)
         {
-            if(line.Contains($"@git.forge.ep{"i"}ta.fr")) // repo
+            if(line.Contains($"@git.forge.ep{"i"}ta.fr")) // Lien d'un dépos
             {
                 string[] gitRepoLine = line.Split('"');
-                foreach(string part in gitRepoLine) {
+                foreach(string part in gitRepoLine) 
+                {
                     if (part.Contains($"@git.forge.ep{"i"}ta.fr"))
                         balises.Add("repoLink", new string[]{part});
                 }
             } 
-            else if (line.Contains("<code") && line.Contains($"ep{"i"}ta-prepa-computer-science") && line.Contains("\u251c\u2500")) { // tree
+            else if (line.Contains("<code") && line.Contains($"ep{"i"}ta-prepa-computer-science") && line.Contains("\u251c\u2500")) // Arborescence de fichiers
+            {
                 string[] treeLine = line.Split(">");
-                foreach (var part in treeLine) {
-                    if (part.Contains($"ep{"i"}ta-prepa-computer-science") && part.Contains("\u251c\u2500")) {
+                foreach (string part in treeLine) 
+                {
+                    if (part.Contains($"ep{"i"}ta-prepa-computer-science") && part.Contains("\u251c\u2500")) 
+                    {
                         string[] newPart = part.Split("<");
                         string tree = newPart[0];
                         balises.Add("tree", new string[] { tree });
                     }
                 }
-            } else if (line.Contains("<code") && line.Contains("dotnet new sln")) { // commands
+            } 
+            else if (line.Contains("<code") && line.Contains("dotnet new sln")) //
+            {
                 string[] slnLine = line.Split(">")[3..];  // les trois premiers splits ne sont pas utiles
                 string commands = ""; // les trois commandes a executer
-                foreach (var part in slnLine) {
+                foreach (var part in slnLine) 
+                {
                     if (part.Contains("dotnet new sln"))
                         commands += part + "\n";
                     else if (part.Contains("dotnet new console"))
@@ -299,6 +297,10 @@ private class Parsing : ArchiBuilder
                 }
                 
                 balises.Add("shellCommands", new string[] { commands });
+            }
+            else if (line.Contains("private" || "public"))
+            {
+                
             }
         }
 
