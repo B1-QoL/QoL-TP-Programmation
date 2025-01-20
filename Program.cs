@@ -59,11 +59,13 @@ public class ArchiBuilder
             foreach (string file in alreadyFoundFiles)
             {
                 Console.Write($"{file} : ");
-                if (Console.ReadKey() == 'o')
+                
+                if (Console.ReadKey() != 'o')
                     // Remove le fichier de la liste des fichiers à modifier
+                    
+                Console.WriteLine();
             }
         }
-
 
         if(unknownFiles.Lenght != 0)
         {
@@ -85,12 +87,7 @@ public class ArchiBuilder
     }
     
     // Traiter le cas où demande de mot de passe.
-    private static string GetWebsiteCode(string url) 
-    {
-        throw new NotImplementedException("");
-        // return _client.GetStringAsync(url).Result;
-        return "test";
-    }
+    private static string GetWebsiteCode(string url) => throw new NotImplementedException("");
     
     /// <summary>
     /// Execute une commande avec /bin/sh
@@ -116,20 +113,7 @@ public class ArchiBuilder
     }
 }
 
-
-private class Writing : ArchiBuilder
-{
-    private static int Writing(<string,string[]> balises)
-    {
-        (List<string> unknownFiles, List<string> alreadyFoundFiles) = BuildTree(balises[tree][0]);
-
-        
-
-        return 0;
-    }
-}
-
-private sealed class BuildTree : Writing 
+private sealed class BuildTree : ArchiBuilder 
 {
     /// <summary>
     /// Renvoie le nom du fichier ou dossier de la ligne dans l'arborescence. Plus précisément, c'est la fin de la chaîne de charactères <c>line</c> à partir de la première lettre trouvée qui est renvoyée.
