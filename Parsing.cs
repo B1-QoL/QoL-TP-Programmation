@@ -1,3 +1,5 @@
+using System.Text;
+
 namespace B1.ArchiBuilder;
 using static B1.Affichage;
 // Partie analysant le code de la page
@@ -12,8 +14,16 @@ public partial class ArchiBuilder
     /// <returns>Un dictoinnaire avec les cle: "repoLink", "tree" et "shellCommands"</returns>
     private static Dictionary<string, List<string>> ParsePage(string pageCode)
     {
+        Print(pageCode.Length);
+        
         pageCode = RemoveTagContent(pageCode, "style");
-        pageCode = RemoveTagContent(pageCode, "script");
+        pageCode = RemoveTagContent(pageCode,"script");
+        
+        Print(pageCode.Length);
+
+        throw new NotImplementedException();
+        
+        //pageCode = RemoveTagContent(pageCode, "script");
         Dictionary<string, List<string>> balises = new();
         string[] pageArray = pageCode.Split('\n');
         
@@ -137,8 +147,8 @@ public partial class ArchiBuilder
 
     private static string RemoveTagContent(string htmlCode, string tag)
     {
-        int i = 0, j = -1, l2 = tag.Length, resLength = 0;
-        string res = "";
+        int j = -1, l2 = tag.Length, resLength = 0;
+        StringBuilder res = new StringBuilder();
         bool inBeacon = false;
         
         foreach(char c in htmlCode)
@@ -151,13 +161,14 @@ public partial class ArchiBuilder
                 {
                     inBeacon = true;
                     j = -2;
-                    res = res.Substring(0,resLength - l2 - 1);
+                    res.Remove(resLength - l2 - 1, l2 + 1);
+                    resLength -= l2 + 1;
                     continue;
                 }
                 else
                     j = -1;
 
-                res += c;
+                res.Append(c);
                 ++resLength;
             }
             else
@@ -168,14 +179,13 @@ public partial class ArchiBuilder
                 {
                     inBeacon = false;
                     j = -1;
-                    continue;
                 }
                 else
-                    j = -1;
+                    j = -2;
             }
         }
-
-        return res;
+        
+        return res.ToString();
     }
 
 }
