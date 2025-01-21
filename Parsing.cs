@@ -137,49 +137,41 @@ public partial class ArchiBuilder
 
     private static string RemoveTagContent(string htmlCode, string tag)
     {
-        int i = 0, l1 = htmlCode.Length, j = -1, l2 = tag.Length;
+        int i = 0, j = -1, l2 = tag.Length, resLength = 0;
         string res = "";
         bool inBeacon = false;
         
-        while (i < l1)
+        foreach(char c in htmlCode)
         {
             if (!inBeacon)
             {
-                if (j < l2 && ((j == -1 && htmlCode[i] == '<') || (j != -1 && tag[j] == htmlCode[i])))
+                if (j < l2 && ((j == -1 && c == '<') || (j != -1 && tag[j] == c)))
                     ++j;
                 else if (j == l2)
                 {
                     inBeacon = true;
                     j = -2;
-                    res = res.Substring(0,res.Length - l2 - 1);
-                    ++i;
+                    res = res.Substring(0,resLength - l2 - 1);
                     continue;
                 }
                 else
-                {
                     j = -1;
-                }
 
-                res += htmlCode[i];
-                ++i;
+                res += c;
+                ++resLength;
             }
             else
             {
-                if (j < l2 && ((j == -2 && htmlCode[i] == '<') || (j == -1 && htmlCode[i] == '/') || (j > -1 && tag[j] == htmlCode[i])))
+                if (j < l2 && ((j == -2 && c == '<') || (j == -1 && c == '/') || (j > -1 && tag[j] == c)))
                     ++j;
                 else if (j == l2)
                 {
                     inBeacon = false;
                     j = -1;
-                    ++i;
                     continue;
                 }
                 else
-                {
                     j = -1;
-                }
-                
-                ++i;
             }
         }
 
