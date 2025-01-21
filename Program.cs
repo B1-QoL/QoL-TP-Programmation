@@ -19,7 +19,12 @@ public partial class ArchiBuilder
         }*/
 
         //string pageCode = GetWebsiteCode(args[0]);
+
+       // string test = "<!DOCTYPE html><html lang=en><head><title>TinyTigrix</title><!--md5sum=b5c15f7c7966af149a8998d7cb780d8f-->";
+
         string pageCode = File.ReadAllText("/home/prenom.nom/Downloads/pageCode.html");
+
+        //throw new NotImplementedException();
         
         Dictionary<string, List<string>> balises = ParsePage(pageCode);
 
