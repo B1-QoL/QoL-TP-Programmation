@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Text;
 using static B1.Affichage;
     
 namespace B1.ArchiBuilder;
@@ -20,14 +21,20 @@ public partial class ArchiBuilder
 
         //string pageCode = GetWebsiteCode(args[0]);
 
-       // string test = "<!DOCTYPE html><html lang=en><head><title>TinyTigrix</title><!--md5sum=b5c15f7c7966af149a8998d7cb780d8f-->";
+        //string test ="<!DOCTYPE html><html lang=en> <head><title>TinyTigrix</title><!--md5sum=b5c15f7c7966af149a8998d7cb780d8f--><meta content=\"text/html; charset=utf-8\" http-equiv=Content-Type><meta content=en name=language><meta content=TinyTigrix name=title><base target=_blank><style>/*!\n * Bootstrap  v5.3.1 (https://getbootstrap.com/)\n * Copyright 2011-2023 The Bootstrap Authors\n * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)\n */</style>:root,";
+        //Print(KeepTagContent(test,"style"));
+        
+        string pageCode = File.ReadAllText("/home/gabriel.klinger/Downloads/pageCode.html");
 
-        string pageCode = File.ReadAllText("/home/prenom.nom/Downloads/pageCode.html");
-
+        //Print(ParseWithCode(new StringBuilder("asdasdasdas</code>")));
+        
         //throw new NotImplementedException();
         
         Dictionary<string, List<string>> balises = ParsePage(pageCode);
-
+        
+        Print(balises["creationCommands"]);
+        Print(balises["tree"]);
+        
         throw new NotImplementedException();
         
         /*if (!balises.ContainsKey("repoLink")) 
