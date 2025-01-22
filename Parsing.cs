@@ -14,20 +14,22 @@ public partial class ArchiBuilder
     /// <returns>Un dictoinnaire avec les cle: "repoLink", "tree" et "shellCommands"</returns>
     private static Dictionary<string, List<string>> ParsePage(string pageCode)
     {
-        Print(pageCode.Length);
-        
-        pageCode = RemoveTagContent(pageCode, "style");
-        pageCode = RemoveTagContent(pageCode,"script");
-        
-        Print(pageCode.Length);
-
-        throw new NotImplementedException();
-        
+        //pageCode = RemoveComments(pageCode);
         //pageCode = RemoveTagContent(pageCode, "script");
-        Dictionary<string, List<string>> balises = new();
-        string[] pageArray = pageCode.Split('\n');
+        //pageCode = RemoveTagContent(pageCode,"style");
+        List<string> parsedPage = ParseWithCode(KeepTagContent(pageCode, "code"));
         
-        foreach (string line in pageArray)
+        Print(parsedPage.Count);
+        
+        StreamWriter sw2 = new StreamWriter("test");
+        sw2.Write(pageCode);
+        sw2.Close();
+        
+        //throw new NotImplementedException();
+
+        Dictionary<string, List<string>> balises = new();
+        
+        foreach (string line in parsedPage)
         { 
             if (line.Contains($"@git.forge.ep{"i"}ta.fr")) // Lien d'un dépot
             {
@@ -65,18 +67,16 @@ public partial class ArchiBuilder
             }
             else if (line.Contains("\u251c\u2500")) // Arborescence de fichiers
             {
-                string parsedLine = RemoveTags(line);
+                var parsedLine = RemoveBefore(line,line.First(c => c is '\u251c' or '\u2500').ToString());
                 
                 if (!balises.TryAdd("tree", new List<string> {parsedLine}))
                     balises["tree"].Add(parsedLine);
             }
             else if (line.Contains("private") || line.Contains("public"))
             {
+                break;
                 if (line.Contains("string"))
                 {
-                    Print(line);
-                    string parsedLine = RemoveTags(line);
-                    Print(parsedLine);
                     break;
                 }
                 
@@ -110,35 +110,6 @@ public partial class ArchiBuilder
         while (i < l1 && line[i] != pattern)
         {
             res += line[i];
-            ++i;
-        }
-
-        return res;
-    }
-
-    private static string RemoveTags(string line)
-    {
-        int i = 0, l = line.Length;
-        Stack<char> depth = new Stack<char>();
-        string res = "";
-        while (i < l)
-        {
-            switch (line[i])
-            {
-                case '<':
-                    depth.Push('<');
-                    break;
-                case '>' when depth.Count != 0:
-                    depth.Pop();
-                    break;
-                default:
-                {
-                    if (depth.Count == 0)
-                        res += line[i];
-                    break;
-                }
-            }
-
             ++i;
         }
 
@@ -188,4 +159,130 @@ public partial class ArchiBuilder
         return res.ToString();
     }
 
+    private static string KeepTagContent(string htmlCode, string tag)
+    {
+        int j = -1, l2 = tag.Length, resLength = 0;
+        StringBuilder res = new StringBuilder();
+        bool inBeacon = false;
+        
+        foreach(char c in htmlCode)
+        {
+            if (!inBeacon)
+            {
+                if (j < l2 && ((j == -1 && c == '<') || (j != -1 && tag[j] == c)))
+                {
+                    res.Append(c);
+                    ++resLength;
+                    ++j;
+                }
+                else if (j == l2)
+                {
+                    inBeacon = true;
+                    res.Append(c);
+                    ++resLength;
+                    j = -2;
+                }
+                else if(j != -1)
+                {
+                    res.Remove(resLength - j - 1, j + 1);
+                    resLength -= j + 1;
+                    j = -1;
+                }
+            }
+            else
+            {
+                if (j < l2 && ((j == -2 && c == '<') || (j == -1 && c == '/') || (j > -1 && tag[j] == c)))
+                    ++j;
+                else if (j == l2)
+                {
+                    inBeacon = false;
+                    j = -1;
+                }
+                else
+                    j = -2;
+                
+                res.Append(c);
+                ++resLength;
+            }
+        }
+        
+        return res.ToString();
+    }
+    
+    private static string RemoveComments(string htmlCode)
+    {
+        Stack<char> depth = new Stack<char>();
+        StringBuilder res = new StringBuilder();
+        char precedentChar = '\0';
+        int resLength = 0;
+        
+        foreach(char c in htmlCode)
+        {
+            switch (c)
+            {
+                case '/' when depth.Count == 0 && precedentChar == '/' :
+                    depth.Push('/');
+                    res.Remove(resLength - 1, 1);
+                    --resLength;
+                    break;
+                case '\n' when depth.Count != 0 && depth.Peek() == '/':
+                    depth.Pop();
+                    break;
+                case '*' when depth.Count == 0 && precedentChar == '/' :
+                    depth.Push('*');
+                    res.Remove(resLength - 1, 1);
+                    --resLength;
+                    break;
+                case '/' when depth.Count != 0 && precedentChar == '*' && depth.Peek() == '*':
+                    depth.Pop();
+                    break;
+                default:
+                {
+                    if (depth.Count == 0)
+                    {
+                        res.Append(c);
+                        ++resLength;
+                    }
+                    break;
+                }
+            }
+
+            precedentChar = c;
+        }
+
+        return res.ToString(); 
+    }
+    
+    private static List<string> ParseWithCode(string htmlCode)
+    {
+        List<string> res = new List<string>();
+        string temp = "";
+        int checkValidity = 0;
+        
+        foreach(char c in htmlCode)
+        {
+            checkValidity = c switch
+            {
+                '<' when checkValidity == 0 => 1,
+                '/' when checkValidity == 1 => 2,
+                'c' when checkValidity == 2 => 3,
+                'o' when checkValidity == 3 => 4,
+                'd' when checkValidity == 4 => 5,
+                'e' when checkValidity == 5 => 6,
+                '>' when checkValidity == 6 => 7,
+                _ => 0
+            };
+
+            temp += c;
+            
+            if (temp.Length >= 7 && temp[^7..] == "</code>")
+            {
+                res.Add(temp);
+                temp = "";
+            }
+            
+        }
+
+        return res;
+    }
 }
