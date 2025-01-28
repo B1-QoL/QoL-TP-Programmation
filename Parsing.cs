@@ -285,4 +285,84 @@ public partial class ArchiBuilder
 
         return res;
     }
+
+    private static List<string> BeaconParse(string stringToParse, string openingTag, string closingTag, bool includeTags = true)
+    {
+        int j = 0, openingTagLength = openingTag.Length, closingTagLength = closingTag.Length, resLength = 0;
+        StringBuilder line = new StringBuilder();
+        bool inBeacon = false;
+        List<string> parsedString = new List<string>();
+        
+        foreach(char c in stringToParse)
+        {
+            if (!inBeacon)
+            {
+                if (j < openingTagLength && c == openingTag[j])
+                {
+                    line.Append(c);
+                    ++resLength;
+                    ++j;
+                }
+                else if (j == openingTagLength)
+                {
+                    inBeacon = true;
+                    line.Append(c);
+                    ++resLength;
+                    j = 0;
+
+                    if (includeTags) continue;
+                    line.Remove(resLength - openingTagLength - 1, openingTagLength);
+                    resLength -= openingTagLength;
+                }
+                else if(j != 0)
+                {
+                    line.Remove(resLength - j, j);
+                    resLength -= j;
+                    j = 0;
+                }
+            }
+            else
+            {
+                if (j < closingTagLength && c == closingTag[j])
+                {
+                    ++j;
+                    line.Append(c);
+                    ++resLength;
+                }
+                else if (j == closingTagLength)
+                {
+                    inBeacon = false;
+                    j = 0;
+
+                    if (!includeTags)
+                        line.Remove(resLength - closingTagLength, closingTagLength);
+                    
+                    parsedString.Add(line.ToString());
+                    line = line.Clear();
+                    resLength = 0;
+                    
+                    if (c != openingTag[j]) continue;
+                    line.Append(c);
+                    ++resLength;
+                    ++j;
+                }
+                else
+                {
+                    j = 0;
+                    line.Append(c);
+                    ++resLength;
+                }
+            }
+        }
+        
+        return parsedString;
+    }
+    
+    
+    private static string FindFormToken(string htmlCode)
+    {
+        string tokenLine = BeaconParse(htmlCode, "<input type=\"hidden\"", ">")[0];
+
+        return BeaconParse(tokenLine, "value=\"", "\"",false)[0];
+    }
 }
