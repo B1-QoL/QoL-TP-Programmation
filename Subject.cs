@@ -7,6 +7,25 @@ namespace B1.ArchiBuilder;
 
 public partial class ArchiBuilder
 {
+    private static string GetSubject2(string subjectLink)
+    {
+        string cookiesFile = ".cookie-jar.ArchiBuilder.txt";
+
+        ProcessStartInfo getCookies = CreateProcess($"curl -L -c {cookiesFile} https://cri.epita.fr/auth/login/?spnego=0");
+        using Process? getCookiesProcess = Process.Start(getCookies);
+        getCookiesProcess?.WaitForExit();
+        string formToken = FindFormToken(getCookiesProcess.StandardOutput.ReadToEnd());
+        
+        ProcessStartInfo sendForm = CreateProcess($"curl -L -b {cookiesFile} -d \"usersame={AskUsername()}\" -d \"password={AskPassword()}\" -d \"csrfmiddlewaretoken={formToken}\" -e https://cri.epita.fr/auth/login/?spnego=0 https://cri.epita.fr/auth/login/");
+        using Process? sendFormProcess = Process.Start(getCookies);
+        sendFormProcess?.WaitForExit();
+        Print(sendFormProcess.StandardOutput.ReadToEnd());
+        Print("-------------------------------------");
+        Print(sendFormProcess.StandardError.ReadToEnd());
+        
+        throw new NotImplementedException();
+    }
+    
     private static string GetSubject(string subjectLink)
     {
         string cookiesFile = ".cookie-jar.ArchiBuilder.txt";
@@ -24,13 +43,16 @@ public partial class ArchiBuilder
         redirectedLink = redirectedLink ?? throw new Exception();
         
         // Requete 2 : Connection au cri
+        Print(File.ReadAllText(cookiesFile));
+        Print(formToken);
         Console.WriteLine("Veuillez entrer vos identifiants Forge :");
-        ProcessStartInfo getTPCodeProcessStartInfo = CreateProcess($"\"curl -L -b {cookiesFile} -c {cookiesFile} -d \"usersame={AskUsername()}\" -d \"password={AskPassword()}\" -d \"csrfmiddlewaretoken={formToken}\" {"https://cri.epita.fr" + redirectedLink} \"");
+        ProcessStartInfo getTPCodeProcessStartInfo = CreateProcess($"curl -L -b {cookiesFile} -c {cookiesFile} -d \"usersame={AskUsername()}\" -d \"password={AskPassword()}\" -d \"csrfmiddlewaretoken={formToken}\" -e {subjectLink} {"https://cri.epita.fr" + "/auth/login/"/*redirectedLink*/}");
 
         using Process? getTPCodeProcess = Process.Start(getTPCodeProcessStartInfo);
         getTPCodeProcess?.WaitForExit();
         string TPPageCode = getTPCodeProcess!.StandardOutput.ReadToEnd();
 
+        Print(getTPCodeProcess.StandardError.ReadToEnd());
         Print(TPPageCode);
         
         return "";
@@ -65,30 +87,33 @@ public partial class ArchiBuilder
     {
         Console.Write("Password : ");
         StringBuilder input = new StringBuilder();
-        while (true)
+        ConsoleKeyInfo key = Console.ReadKey(true);
+        
+        while (key.Key is not ConsoleKey.Enter)
         {
             int x = Console.CursorLeft;
             int y = Console.CursorTop;
-            ConsoleKeyInfo key = Console.ReadKey(true);
-            if (key.Key == ConsoleKey.Enter)
+            
+            if (key.Key == ConsoleKey.Backspace)
             {
-                Console.WriteLine();
-                break;
+                if (input.Length > 0)
+                {
+                    input.Remove(input.Length - 1, 1);
+                    Console.SetCursorPosition(x - 1, y);
+                    Console.Write(" ");
+                    Console.SetCursorPosition(x - 1, y);
+                }
             }
-            if (key.Key == ConsoleKey.Backspace && input.Length > 0)
-            {
-                input.Remove(input.Length - 1, 1);
-                Console.SetCursorPosition(x - 1, y);
-                Console.Write(" ");
-                Console.SetCursorPosition(x - 1, y);
-            }
-            else if (key.Key != ConsoleKey.Backspace)
+            else
             {
                 input.Append(key.KeyChar);
                 Console.Write("*");
             }
+            
+            key = Console.ReadKey(true);
         }
-
+        
+        Console.WriteLine();
         return input.ToString();
     }
 }
