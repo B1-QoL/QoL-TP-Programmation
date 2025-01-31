@@ -1,101 +1,46 @@
-using System.Diagnostics;
-using System.Runtime.Versioning;
+using System.Net.Sockets;
 using System.Text;
-using static B1.Affichage;
 
 namespace B1.ArchiBuilder;
 
-public partial class ArchiBuilder
-{    
-    private static string GetSubject(string subjectLink)
+public class CriUser
+{
+    public string Username { get; }
+    public string Password { get; }
+
+    private CriUser(string username, string password)
     {
-        string cookiesFile = ".cookie-jar.ArchiBuilder.txt";
-        try
-        {
-            File.Create(cookiesFile);
-        }
-        catch(Exception)
-        {
-            // L'utilisateur n'a pas les droits pour écrire dans le dossier courant
-            return "1";
-        }
-
-        // Requête 1 : Connection à la page de connexion du cri
-        ProcessStartInfo getTokensProcessStartInfo = CreateProcess($"curl -L --verbose -c {cookiesFile} {subjectLink}");
-
-        using Process? getTokensProcess = Process.Start(getTokensProcessStartInfo);
-        getTokensProcess?.WaitForExit();
-        string criConnexionPageCode = getTokensProcess!.StandardOutput.ReadToEnd();
-        
-        string formToken = FindFormToken(criConnexionPageCode);
-        
-        string? redirectedLink = BeaconParse(getTokensProcess.StandardError.ReadToEnd(), "< location: ", "\n", false).Find(str => str.StartsWith("/auth/login"));
-
-        if(redirectedLink is null)
-            // Le lien est invalide
-            return "2";
-        
-        // Requête 2 : Authentification
-        Console.WriteLine("Veuillez entrer vos identifiants Forge :");
-        ProcessStartInfo getTPCodeProcessStartInfo = CreateProcess(
-            $"curl -L " +
-            $"-b {cookiesFile} " +
-            $"-c {cookiesFile} " +
-            $"-d 'usersame={AskUsername()}' " +
-            $"-d 'password={AskPassword()}' " +
-            $"-d 'csrfmiddlewaretoken={formToken}' " +
-            $"-e {subjectLink} " +
-            $"{redirectedLink} "
-        );
-
-        using Process? getTPCodeProcess = Process.Start(getTPCodeProcessStartInfo);
-        getTPCodeProcess?.WaitForExit();
-        string TPPageCode = getTPCodeProcess!.StandardOutput.ReadToEnd();
-
-        Print(getTPCodeProcess.StandardError.ReadToEnd());
-        Print(TPPageCode);
-        File.Delete(cookiesFile);
-        
-        return "";
+        Username = username;
+        Password = password;
     }
 
-    private static ProcessStartInfo CreateProcess(string command) =>
-        new()
-        {
-            #if LINUX
-                Arguments = $"-c \"{command}\"",
-                FileName = "/bin/sh",
-            #elif WINDOWS
-            
-            #endif
-            
-            CreateNoWindow = true,
-            ErrorDialog = false,
-            RedirectStandardError = true,
-            RedirectStandardInput = true,
-            RedirectStandardOutput = true,
-            UseShellExecute = false
-        };
+    public static CriUser AskCredentials()
+    {
+        Console.WriteLine("Enter your Forge credentials!");
+        var username = AskUsername();
+        var password = AskPassword();
+
+        return new CriUser(username, password);
+    }
 
     private static string AskUsername()
     {
-        Console.Write("Username : ");
-        string input = Console.ReadLine()!;
+        Console.Write("Username: ");
+        string? input = Console.ReadLine();
+        if (input == null) throw new ArgumentException("Forge username should not be empty");
         return input;
     }
 
     private static string AskPassword()
     {
-        Console.Write("Password : ");
-        StringBuilder input = new StringBuilder();
-        ConsoleKeyInfo key = Console.ReadKey(true);
-        
-        while (key.Key is not ConsoleKey.Enter)
+        Console.Write("Password: ");
+        var input = new StringBuilder();
+
+        while (Console.ReadKey(true) is {} info && info.Key != ConsoleKey.Enter)
         {
-            int x = Console.CursorLeft;
-            int y = Console.CursorTop;
-            
-            if (key.Key == ConsoleKey.Backspace)
+            (int x, int y) = (Console.CursorLeft, Console.CursorTop);
+
+            if (info.Key == ConsoleKey.Backspace)
             {
                 if (input.Length > 0)
                 {
@@ -107,14 +52,47 @@ public partial class ArchiBuilder
             }
             else
             {
-                input.Append(key.KeyChar);
+                input.Append(info.KeyChar);
                 Console.Write("*");
             }
-            
-            key = Console.ReadKey(true);
         }
-        
+
         Console.WriteLine();
+
+        if (input.Length == 0) throw new ArgumentException("Forge password should not be empty");
+
         return input.ToString();
+    }
+}
+public static partial class ArchiBuilder
+{
+    private static string GetSubject(string subjectLink, CriUser user)
+    {
+        using var handler = new HttpClientHandler();
+        handler.AllowAutoRedirect = true;
+        using var client = new HttpClient(handler);
+
+        // Get session cookies and `csrfmiddlewaretoken`
+        var initialReq = new HttpRequestMessage(HttpMethod.Get, new Uri(subjectLink));
+        var initialRes = client.Send(initialReq);
+        var initialContent = new StreamReader(initialRes.Content.ReadAsStream()).ReadToEnd();
+        var formToken = FindFormToken(initialContent);
+
+        // Login with credentials
+        var content = new FormUrlEncodedContent(new[]
+        {
+            KeyValuePair.Create("csrfmiddlewaretoken", formToken),
+            KeyValuePair.Create("username", user.Username),
+            KeyValuePair.Create("password", user.Password)
+        });
+
+        var loginReq = new HttpRequestMessage(HttpMethod.Post, initialRes.RequestMessage?.RequestUri);
+        loginReq.Headers.Referrer = initialRes.RequestMessage?.RequestUri;
+        loginReq.Content = content;
+        var subjectResponse = client.Send(loginReq);
+        if (!subjectResponse.IsSuccessStatusCode) throw new IOException("Could not correctly authenticate or fetch the subject");
+        var subjectContent = new StreamReader(subjectResponse.Content.ReadAsStream()).ReadToEnd();
+
+        return subjectContent;
     }
 }

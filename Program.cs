@@ -28,9 +28,11 @@ public static partial class ArchiBuilder
         //string test ="<!DOCTYPE html><html lang=en> <head><title>TinyTigrix</title><!--md5sum=b5c15f7c7966af149a8998d7cb780d8f--><meta content=\"text/html; charset=utf-8\" http-equiv=Content-Type><meta content=en name=language><meta content=TinyTigrix name=title><base target=_blank><style>/*!\n * Bootstrap  v5.3.1 (https://getbootstrap.com/)\n * Copyright 2011-2023 The Bootstrap Authors\n * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)\n */</style>:root,";
         //Print(KeepTagContent(test,"style"));
 
-        string link =
-            "https://intra.forge.epita.fr/epita-prepa-computer-science/prog-103-p-02-2029/root/prog-103-p-02-2029";
-        GetSubject(link);
+        var subjectLink = "https://intra.forge.epita.fr/epita-prepa-computer-science/prog-103-p-02-2029/root/prog-103-p-02-2029/subject.html";
+        var user = CriUser.AskCredentials();
+
+        var subjectContent = GetSubject(subjectLink, user);
+
         throw new NotImplementedException();
 
         string pageCode = File.ReadAllText("/home/prenom.nom/Downloads/pageCode.html");
