@@ -10,8 +10,17 @@ public partial class ArchiBuilder
     private static string GetSubject(string subjectLink)
     {
         string cookiesFile = ".cookie-jar.ArchiBuilder.txt";
+        try
+        {
+            File.Create(cookiesFile);
+        }
+        catch(Exception)
+        {
+            // L'utilisateur n'a pas les droits pour écrire dans le dossier courant
+            return "1";
+        }
 
-        // Requête 1 : Récupération des cookies de session du cri
+        // Requête 1 : Connection à la page de connexion du cri
         ProcessStartInfo getTokensProcessStartInfo = CreateProcess($"curl -L --verbose -c {cookiesFile} {subjectLink}");
 
         using Process? getTokensProcess = Process.Start(getTokensProcessStartInfo);
@@ -21,13 +30,17 @@ public partial class ArchiBuilder
         string formToken = FindFormToken(criConnexionPageCode);
         
         string? redirectedLink = BeaconParse(getTokensProcess.StandardError.ReadToEnd(), "< location: ", "\n", false).Find(str => str.StartsWith("/auth/login"));
-        redirectedLink = redirectedLink ?? throw new Exception();
+
+        if(redirectedLink is null)
+            // Le lien est invalide
+            return "2";
         
-        // Requête 2 : Connection au cri
+        // Requête 2 : Authentification
         Console.WriteLine("Veuillez entrer vos identifiants Forge :");
         ProcessStartInfo getTPCodeProcessStartInfo = CreateProcess(
             $"curl -L " +
-            $"-b {cookiesFile} -c {cookiesFile} " +
+            $"-b {cookiesFile} " +
+            $"-c {cookiesFile} " +
             $"-d 'usersame={AskUsername()}' " +
             $"-d 'password={AskPassword()}' " +
             $"-d 'csrfmiddlewaretoken={formToken}' " +
@@ -41,6 +54,7 @@ public partial class ArchiBuilder
 
         Print(getTPCodeProcess.StandardError.ReadToEnd());
         Print(TPPageCode);
+        File.Delete(cookiesFile);
         
         return "";
     }
