@@ -6,31 +6,12 @@ using static B1.Affichage;
 namespace B1.ArchiBuilder;
 
 public partial class ArchiBuilder
-{
-    private static string GetSubject2(string subjectLink)
-    {
-        string cookiesFile = ".cookie-jar.ArchiBuilder.txt";
-
-        ProcessStartInfo getCookies = CreateProcess($"curl -L -c {cookiesFile} https://cri.epita.fr/auth/login/?spnego=0");
-        using Process? getCookiesProcess = Process.Start(getCookies);
-        getCookiesProcess?.WaitForExit();
-        string formToken = FindFormToken(getCookiesProcess.StandardOutput.ReadToEnd());
-        
-        ProcessStartInfo sendForm = CreateProcess($"curl -L -b {cookiesFile} -d \"usersame={AskUsername()}\" -d \"password={AskPassword()}\" -d \"csrfmiddlewaretoken={formToken}\" -e https://cri.epita.fr/auth/login/?spnego=0 https://cri.epita.fr/auth/login/");
-        using Process? sendFormProcess = Process.Start(getCookies);
-        sendFormProcess?.WaitForExit();
-        Print(sendFormProcess.StandardOutput.ReadToEnd());
-        Print("-------------------------------------");
-        Print(sendFormProcess.StandardError.ReadToEnd());
-        
-        throw new NotImplementedException();
-    }
-    
+{    
     private static string GetSubject(string subjectLink)
     {
         string cookiesFile = ".cookie-jar.ArchiBuilder.txt";
 
-        // Requete 1 : recuperer les cookies de session du cri
+        // Requête 1 : Récupération des cookies de session du cri
         ProcessStartInfo getTokensProcessStartInfo = CreateProcess($"curl -L --verbose -c {cookiesFile} {subjectLink}");
 
         using Process? getTokensProcess = Process.Start(getTokensProcessStartInfo);
@@ -42,11 +23,17 @@ public partial class ArchiBuilder
         string? redirectedLink = BeaconParse(getTokensProcess.StandardError.ReadToEnd(), "< location: ", "\n", false).Find(str => str.StartsWith("/auth/login"));
         redirectedLink = redirectedLink ?? throw new Exception();
         
-        // Requete 2 : Connection au cri
-        Print(File.ReadAllText(cookiesFile));
-        Print(formToken);
+        // Requête 2 : Connection au cri
         Console.WriteLine("Veuillez entrer vos identifiants Forge :");
-        ProcessStartInfo getTPCodeProcessStartInfo = CreateProcess($"curl -L -b {cookiesFile} -c {cookiesFile} -d \"usersame={AskUsername()}\" -d \"password={AskPassword()}\" -d \"csrfmiddlewaretoken={formToken}\" -e {subjectLink} {"https://cri.epita.fr" + "/auth/login/"/*redirectedLink*/}");
+        ProcessStartInfo getTPCodeProcessStartInfo = CreateProcess(
+            $"curl -L " +
+            $"-b {cookiesFile} -c {cookiesFile} " +
+            $"-d 'usersame={AskUsername()}' " +
+            $"-d 'password={AskPassword()}' " +
+            $"-d 'csrfmiddlewaretoken={formToken}' " +
+            $"-e {subjectLink} " +
+            $"{redirectedLink} "
+        );
 
         using Process? getTPCodeProcess = Process.Start(getTPCodeProcessStartInfo);
         getTPCodeProcess?.WaitForExit();
