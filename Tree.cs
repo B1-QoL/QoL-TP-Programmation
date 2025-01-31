@@ -1,21 +1,22 @@
 namespace B1.ArchiBuilder;
 
 // Partie construisant l'arborescence de fichiers
-public partial class ArchiBuilder 
+public static partial class ArchiBuilder
 {
     /// <summary>
     /// Renvoie le nom du fichier ou dossier de la ligne dans l'arborescence. Plus précisément, c'est la fin de la chaîne de charactères <c>line</c> à partir de la première lettre trouvée qui est renvoyée.
     /// </summary>
     /// <param name="line">Ligne à traiter.</param>
     /// <returns>Nom de l'objet trouvé.</returns>
-    private static string GetName(string line) 
+    private static string GetName(string line)
     {
         string res = "";
         bool nameStarted = false;
-        
-        foreach (var c in line) 
+
+        foreach (var c in line)
         {
-            if (nameStarted || ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || c == '.') {
+            if (nameStarted || ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || c == '.')
+            {
                 res += c;
                 nameStarted = true;
             }
@@ -29,7 +30,7 @@ public partial class ArchiBuilder
     /// </summary>
     /// <param name="line">Ligne à traiter.</param>
     /// <returns>Profondeur de l'objet dans l'arbre.</returns>
-    private static int GetDepth(string line) 
+    private static int GetDepth(string line)
     {
         var res = 0;
 
@@ -48,12 +49,12 @@ public partial class ArchiBuilder
     /// <remarks>
     /// Les fichiers cachés (commençant par ".") seront également créés. 
     /// </remarks>
-    private static (List<string> unknownFiles, List<string> alreadyFoundFiles) BuildTree(List<string> tree) 
+    private static (List<string> unknownFiles, List<string> alreadyFoundFiles) BuildTree(List<string> tree)
     {
         List<string> unknownFiles = new List<string>();
         List<string> alreadyFoundFiles = new List<string>();
-        Stack<(string, int)> folderStack = new ();
-        
+        Stack<(string, int)> folderStack = new();
+
         foreach (string line in tree)
         {
             int depth = GetDepth(line);
@@ -61,14 +62,14 @@ public partial class ArchiBuilder
 
             if (depth == 0) // Ne pas créer de racine.
                 continue;
-            
+
             if (!name.Contains('.') && name != "README") // Vérifie que l'objet est un dossier.
             {
                 name += "/";
 
                 string path = "";
                 bool isPlaced = false;
-                
+
                 while (folderStack.Count != 0 && !isPlaced)
                 {
                     (string previousPath, int previousDepth) = folderStack.Peek();
@@ -78,60 +79,62 @@ public partial class ArchiBuilder
                     else
                         folderStack.Pop();
                 }
-                
+
                 folderStack.Push((path + name, depth));
-                
+
                 (string previousPath2, _) = folderStack.Peek();
                 string[] pathArray = previousPath2.Split('/');
-                
+
                 if (!pathArray.Contains("Tests"))
                     Directory.CreateDirectory(path + name);
             }
             else if (name.Contains('.')) // Fichier avec extension.
             {
-                _filesToEdit.Add((name, new ()));
-                string extension = name.Split('.')[^1], path = "";
+                _filesToEdit.Add((name, new()));
+                string extension = name.Split('.')[^1],
+                    path = "";
                 bool isFilePlaced = false;
 
                 while (folderStack.Count != 0 && !isFilePlaced)
                 {
                     (string previousPath, int previousDepth) = folderStack.Peek();
-                    
+
                     if (previousDepth < depth)
                         (path, isFilePlaced) = (previousPath, true);
                     else
                         folderStack.Pop();
                 }
 
-                switch (extension) 
+                switch (extension)
                 {
-                    case "cs": case "gitignore":
+                    case "cs":
+                    case "gitignore":
                         if (File.Exists(path + name))
                             alreadyFoundFiles.Add(path + name);
                         else
                             File.Create(path + name);
                         break;
-                    case "csproj" or "sln" :
+                    case "csproj" or "sln":
                         break;
-                    default :
+                    default:
                         unknownFiles.Add(name);
                         break;
                 }
             }
-            else 
+            else
             {
-                if (name == "README") 
+                if (name == "README")
                 {
                     string path = "";
                     bool isFilePlaced = false;
 
-                    while (folderStack.Count != 0 && !isFilePlaced) 
+                    while (folderStack.Count != 0 && !isFilePlaced)
                     {
                         (string previousPath, int previousDepth) = folderStack.Peek();
-                        
+
                         if (previousDepth < depth)
                             (path, isFilePlaced) = (previousPath, true);
-                        else 
+                        else
                             folderStack.Pop();
                     }
 
@@ -144,7 +147,7 @@ public partial class ArchiBuilder
                     unknownFiles.Add(name);
             }
         }
-        
+
         return (unknownFiles, alreadyFoundFiles);
     }
 }

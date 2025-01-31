@@ -1,12 +1,13 @@
 using System.Text;
+using static B1.Affichage;
 
 namespace B1.ArchiBuilder;
-using static B1.Affichage;
+
 // Partie analysant le code de la page
-public partial class ArchiBuilder
+public static partial class ArchiBuilder
 {
-    private static List<(string, List<string>)> _filesToEdit = new ();
-    
+    private static List<(string, List<string>)> _filesToEdit = new();
+
     /// <summary>
     /// retourne le dictionnaire avec le contenu requis pour faire l'arborescence
     /// </summary>
@@ -18,19 +19,19 @@ public partial class ArchiBuilder
         //pageCode = RemoveTagContent(pageCode, "script");
         //pageCode = RemoveTagContent(pageCode,"style");
         List<string> parsedPage = ParseWithCode(KeepTagContent(pageCode, "code"));
-        
+
         Print(parsedPage.Count);
-        
+
         StreamWriter sw2 = new StreamWriter("test");
         sw2.Write(pageCode);
         sw2.Close();
-        
+
         //throw new NotImplementedException();
 
         Dictionary<string, List<string>> balises = new();
-        
+
         foreach (string line in parsedPage)
-        { 
+        {
             if (line.Contains($"@git.forge.ep{"i"}ta.fr")) // Lien d'un dépot
             {
                 string[] gitRepoLine = line.Split('"');
@@ -63,13 +64,13 @@ public partial class ArchiBuilder
                 {
                     balises["creationCommands"].Add(command);
                 }
-                
+
             }
             else if (line.Contains("\u251c\u2500")) // Arborescence de fichiers
             {
-                var parsedLine = RemoveBefore(line,line.First(c => c is '\u251c' or '\u2500').ToString());
-                
-                if (!balises.TryAdd("tree", new List<string> {parsedLine}))
+                var parsedLine = RemoveBefore(line, line.First(c => c is '\u251c' or '\u2500').ToString());
+
+                if (!balises.TryAdd("tree", new List<string> { parsedLine }))
                     balises["tree"].Add(parsedLine);
             }
             else if (line.Contains("private") || line.Contains("public"))
@@ -79,7 +80,7 @@ public partial class ArchiBuilder
                 {
                     break;
                 }
-                
+
             }
         }
 
@@ -88,7 +89,10 @@ public partial class ArchiBuilder
 
     private static string RemoveBefore(string line, string pattern)
     {
-        int i = 0, l1 = line.Length, j = 0, l2 = pattern.Length;
+        int i = 0,
+            l1 = line.Length,
+            j = 0,
+            l2 = pattern.Length;
         while (i < l1)
         {
             if (j == l2)
@@ -102,10 +106,11 @@ public partial class ArchiBuilder
 
         return i == l1 ? line : line.Substring(i - j);
     }
-    
+
     private static string RemoveAfter(string line, char pattern)
     {
-        int i = 0, l1 = line.Length;
+        int i = 0,
+            l1 = line.Length;
         string res = "";
         while (i < l1 && line[i] != pattern)
         {
@@ -118,11 +123,13 @@ public partial class ArchiBuilder
 
     private static string RemoveTagContent(string htmlCode, string tag)
     {
-        int j = -1, l2 = tag.Length, resLength = 0;
+        int j = -1,
+            l2 = tag.Length,
+            resLength = 0;
         StringBuilder res = new StringBuilder();
         bool inBeacon = false;
-        
-        foreach(char c in htmlCode)
+
+        foreach (char c in htmlCode)
         {
             if (!inBeacon)
             {
@@ -155,17 +162,19 @@ public partial class ArchiBuilder
                     j = -2;
             }
         }
-        
+
         return res.ToString();
     }
 
     private static string KeepTagContent(string htmlCode, string tag)
     {
-        int j = -1, l2 = tag.Length, resLength = 0;
+        int j = -1,
+            l2 = tag.Length,
+            resLength = 0;
         StringBuilder res = new StringBuilder();
         bool inBeacon = false;
-        
-        foreach(char c in htmlCode)
+
+        foreach (char c in htmlCode)
         {
             if (!inBeacon)
             {
@@ -182,7 +191,7 @@ public partial class ArchiBuilder
                     ++resLength;
                     j = -2;
                 }
-                else if(j != -1)
+                else if (j != -1)
                 {
                     res.Remove(resLength - j - 1, j + 1);
                     resLength -= j + 1;
@@ -200,27 +209,27 @@ public partial class ArchiBuilder
                 }
                 else
                     j = -2;
-                
+
                 res.Append(c);
                 ++resLength;
             }
         }
-        
+
         return res.ToString();
     }
-    
+
     private static string RemoveComments(string htmlCode)
     {
         Stack<char> depth = new Stack<char>();
         StringBuilder res = new StringBuilder();
         char precedentChar = '\0';
         int resLength = 0;
-        
-        foreach(char c in htmlCode)
+
+        foreach (char c in htmlCode)
         {
             switch (c)
             {
-                case '/' when depth.Count == 0 && precedentChar == '/' :
+                case '/' when depth.Count == 0 && precedentChar == '/':
                     depth.Push('/');
                     res.Remove(resLength - 1, 1);
                     --resLength;
@@ -228,7 +237,7 @@ public partial class ArchiBuilder
                 case '\n' when depth.Count != 0 && depth.Peek() == '/':
                     depth.Pop();
                     break;
-                case '*' when depth.Count == 0 && precedentChar == '/' :
+                case '*' when depth.Count == 0 && precedentChar == '/':
                     depth.Push('*');
                     res.Remove(resLength - 1, 1);
                     --resLength;
@@ -250,16 +259,16 @@ public partial class ArchiBuilder
             precedentChar = c;
         }
 
-        return res.ToString(); 
+        return res.ToString();
     }
-    
+
     private static List<string> ParseWithCode(string htmlCode)
     {
         List<string> res = new List<string>();
         string temp = "";
         int checkValidity = 0;
-        
-        foreach(char c in htmlCode)
+
+        foreach (char c in htmlCode)
         {
             checkValidity = c switch
             {
@@ -274,13 +283,13 @@ public partial class ArchiBuilder
             };
 
             temp += c;
-            
+
             if (temp.Length >= 7 && temp[^7..] == "</code>")
             {
                 res.Add(temp);
                 temp = "";
             }
-            
+
         }
 
         return res;
@@ -288,12 +297,15 @@ public partial class ArchiBuilder
 
     private static List<string> BeaconParse(string stringToParse, string openingTag, string closingTag, bool includeTags = true)
     {
-        int j = 0, openingTagLength = openingTag.Length, closingTagLength = closingTag.Length, resLength = 0;
+        int j = 0,
+            openingTagLength = openingTag.Length,
+            closingTagLength = closingTag.Length,
+            resLength = 0;
         StringBuilder line = new StringBuilder();
         bool inBeacon = false;
         List<string> parsedString = new List<string>();
-        
-        foreach(char c in stringToParse)
+
+        foreach (char c in stringToParse)
         {
             if (!inBeacon)
             {
@@ -314,7 +326,7 @@ public partial class ArchiBuilder
                     line.Remove(resLength - openingTagLength - 1, openingTagLength);
                     resLength -= openingTagLength;
                 }
-                else if(j != 0)
+                else if (j != 0)
                 {
                     line.Remove(resLength - j, j);
                     resLength -= j;
@@ -336,11 +348,11 @@ public partial class ArchiBuilder
 
                     if (!includeTags)
                         line.Remove(resLength - closingTagLength, closingTagLength);
-                    
+
                     parsedString.Add(line.ToString());
                     line = line.Clear();
                     resLength = 0;
-                    
+
                     if (c != openingTag[j]) continue;
                     line.Append(c);
                     ++resLength;
@@ -354,15 +366,15 @@ public partial class ArchiBuilder
                 }
             }
         }
-        
+
         return parsedString;
     }
-    
-    
+
+
     private static string FindFormToken(string htmlCode)
     {
         string tokenLine = BeaconParse(htmlCode, "<input type=\"hidden\"", ">")[0];
 
-        return BeaconParse(tokenLine, "value=\"", "\"",false)[0];
+        return BeaconParse(tokenLine, "value=\"", "\"", false)[0];
     }
 }
