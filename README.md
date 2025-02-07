@@ -1,5 +1,5 @@
 # Bibliothèque de fonctions facilitant les travaux pratiques de programmation.
-## Description de la bibliothèque :
+## Description de la bibliothèque : (Ne pas copier les commandes, en réorganisation)
 Comprend :
   - Une fonction C# d'affichage.
 
