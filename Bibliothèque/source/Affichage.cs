@@ -8,126 +8,195 @@ namespace B1;
 /// </summary>
 public static class Affichage
 {
-    ///<summary>
-    /// Affiche dans la console un objet de n'importe quel type. Si l'objet est une collection ou un tuple, la fonction affiche tous les éléments imbriqués suivant cette règle :
-    /// <list type="bullet">
-    /// <item>
-    /// tuple => () ;
-    /// </item>
-    /// <item>
-    /// éléments d'un dictionnaire => [] ;
-    /// </item>
-    /// <item>
-    /// pour tout le reste => {}.
-    /// </item>
-    /// </list>
+    /// <summary>
+    /// Liste des couleurs à utiliser pour les dimensions.
     /// </summary>
-    /// <param name="obj">Objet à afficher. Il peut être de n'importe quel type.</param>
-    /// <param name="colorBrackets">Colorie les différentes dimension de <c>obj</c> si sa valeur est <c>true</c>.</param>
-    /// <param name="endLine">Ajoute ou non un retour à la ligne à la fin de l'affichage.</param>
-    /// <typeparam name="TAny">N'importe quel type.</typeparam>
-    public static void Print<TAny>(TAny obj, bool colorBrackets = false, bool endLine = true) {
-        int color = 0;
-        List<ConsoleColor> colorList = colorBrackets ? new List<ConsoleColor> { ConsoleColor.DarkBlue, ConsoleColor.DarkMagenta, ConsoleColor.DarkGreen, ConsoleColor.Magenta} : new List<ConsoleColor> {ConsoleColor.Gray};
+    private static List<ConsoleColor> _colors = new ();
     
-        void PrintAux<TAny2> (TAny2 obj2)
+    private static void PrintAux<T> (T obj, int color)
+    {
+        switch (obj)
         {
-            switch (obj2)
+            case null:
+                Console.ForegroundColor = _colors[color % _colors.Count];
+                Console.Write("null");
+                break;
+            
+            case IEnumerable enumerable and not string:
             {
-                case IEnumerable enumerable and not string:
+                ++color;
+                Console.ForegroundColor = _colors[color % _colors.Count];
+                Console.Write("{ ");
+
+                IEnumerator enumerator = enumerable.GetEnumerator();
+                using IDisposable? enumerator1 = enumerator as IDisposable;
+                bool b = false;
+
+                while (enumerator.MoveNext())
                 {
-                    Console.ForegroundColor = colorList[color++ % colorList.Count];
-                    Console.Write("{ ");
-
-                    IEnumerator enumerator = enumerable.GetEnumerator();
-                    using var enumerator1 = enumerator as IDisposable;
-                    bool b = false;
-
-                    while (enumerator.MoveNext())
+                    if (b)
                     {
-                        if (b)
-                        {
-                            Console.ForegroundColor = colorList[--color % colorList.Count];
-                            Console.Write(", ");
-                            Console.ForegroundColor = colorList[color++ % colorList.Count];
-                        }
-                        b = true;
-
-                        object? item = enumerator.Current;
-
-                        switch (item)
-                        {
-                            case not null when item.GetType().IsGenericType && item.GetType().GetGenericTypeDefinition() == typeof(KeyValuePair<,>):
-                                Console.ForegroundColor = colorList[color++ % colorList.Count];;
-                                Console.Write("[");
-                                PrintAux(item.GetType().GetProperty("Key")!.GetValue(item));
-                        
-                                Console.ForegroundColor = colorList[--color % colorList.Count];
-                                Console.Write(", ");
-                                Console.ForegroundColor = colorList[color++ % colorList.Count];
-                        
-                                PrintAux(item.GetType().GetProperty("Value")!.GetValue(item));
-                                Console.ForegroundColor = colorList[--color % colorList.Count];
-                                Console.Write("]");
-                                break;
-                            
-                            case IEnumerable inCol:
-                                PrintAux(inCol);
-                                break;
-                            
-                            default:
-                                Console.Write(item);
-                                break;
-                        }
+                        Console.ForegroundColor = _colors[color % _colors.Count];
+                        Console.Write(", ");
                     }
-                    
-                    Console.ForegroundColor = colorList[--color % colorList.Count];
-                    Console.Write(" }");
-                    break;
-                }
-                case ITuple obj3:
-                {
-                    int length = obj3.Length;
-                    
-                    Console.ForegroundColor = colorList[color++ % colorList.Count];
-                    Console.Write("("); ;
-                    
-                    for (int i = 0; i < length; i++)
+                    b = true;
+
+                    object? item = enumerator.Current;
+
+                    switch (item)
                     {
-                        PrintAux(obj3[i]);
-
-                        if (i != length - 1)
-                        {
-                            Console.ForegroundColor = colorList[--color % colorList.Count];
+                        case null:
+                            Console.ForegroundColor = _colors[color % _colors.Count];
+                            Console.Write("null");
+                            break;
+                        
+                        case not null when item.GetType().IsGenericType && 
+                                           item.GetType().GetGenericTypeDefinition() == typeof(KeyValuePair<,>):
+                            Console.ForegroundColor = _colors[++color % _colors.Count];
+                            Console.Write("[");
+                            
+                            PrintAux(item.GetType().GetProperty("Key")!.GetValue(item), color);
+                            
+                            Console.ForegroundColor = _colors[color % _colors.Count];
                             Console.Write(", ");
-                            Console.ForegroundColor = colorList[color++ % colorList.Count];
-                        }
+                            
+                            PrintAux(item.GetType().GetProperty("Value")!.GetValue(item), color);
+                            
+                            Console.ForegroundColor = _colors[color % _colors.Count];
+                            Console.Write("]");
+                            --color;
+                            break;
+                        
+                        case IEnumerable inCol:
+                            PrintAux(inCol, color);
+                            break;
+                        
+                        default:
+                            Console.ForegroundColor = _colors[color % _colors.Count];
+                            Console.Write(item);
+                            break;
                     }
-                    
-                    Console.ForegroundColor = colorList[--color % colorList.Count];
-                    Console.Write(")");
-                    break;
-                    
                 }
-                default:
-                    Console.Write(obj2);
-                    break;
+                
+                Console.ForegroundColor = _colors[color % _colors.Count];
+                Console.Write(" }");
+                --color;
+                break;
             }
+            case ITuple tuple:
+            {
+                int length = tuple.Length;
+                
+                Console.ForegroundColor = _colors[++color % _colors.Count];
+                Console.Write("(");
+                
+                for (int i = 0; i < length; i++)
+                {
+                    PrintAux(tuple[i], color);
+
+                    if (i != length - 1)
+                    {
+                        Console.ForegroundColor = _colors[color % _colors.Count];
+                        Console.Write(", ");
+                    }
+                }
+                
+                Console.ForegroundColor = _colors[color % _colors.Count];
+                Console.Write(")");
+                --color;
+                break;
+                
+            }
+            default:
+                Console.ForegroundColor = _colors[color % _colors.Count];
+                Console.Write(obj);
+                break;
         }
-        
-        PrintAux(obj);
-        Console.ResetColor();
-        
-        if (endLine)
-            Console.WriteLine();
     }
 
     /// <summary>
-    /// Affiche un retour à la ligne si rien n'est donné en paramètre.
-    /// </summary>
-    public static void Print(string obj = "")
+    ///  Affiche dans la console un objet de n'importe quel type. Si l'objet est une collection ou un tuple, la fonction affiche tous les éléments imbriqués suivant cette règle :
+    ///  <list type="bullet">
+    ///  <item>
+    ///  tuple => () ;
+    ///  </item>
+    ///  <item>
+    ///  éléments d'un dictionnaire => [] ;
+    ///  </item>
+    ///  <item>
+    ///  pour tout le reste => {}.
+    ///  </item>
+    ///  </list>
+    ///  </summary>
+    ///  <param name="obj">Objet à afficher. Il peut être de n'importe quel type.</param>
+    ///  <param name="colorBrackets">Colorie les différentes dimension de <c>obj</c> si sa valeur est <c>true</c>.</param>
+    ///  <param name="endLine">Ajoute ou non un retour à la ligne à la fin de l'affichage.</param>
+    /// <param name="newLineAtDim1">Retourne à la ligne entre chaques éléments de la première dimension.</param>
+    /// <param name="colors">Liste des couleurs à utiliser pour les dimensions.</param>
+    /// <typeparam name="T">N'importe quel type.</typeparam>
+    public static void Print<T>(T obj, bool colorBrackets = false, bool endLine = true, bool newLineAtDim1 = false, List<ConsoleColor>? colors = null) 
     {
-        Print(obj,colorBrackets:false);
-    }
+        if (colorBrackets)
+        {
+            _colors = colors ?? new List<ConsoleColor> 
+            { 
+                ConsoleColor.DarkBlue, 
+                ConsoleColor.DarkMagenta, 
+                ConsoleColor.DarkGreen,
+                ConsoleColor.Yellow,
+                ConsoleColor.Magenta,
+                ConsoleColor.Cyan
+            };
+        }
+        else
+        {
+            _colors = new List<ConsoleColor> {ConsoleColor.Gray};
+        }
 
+        if (newLineAtDim1 && obj is IEnumerable enumerable)
+        {
+            Console.ForegroundColor = _colors[0];
+            Console.WriteLine("{");
+            
+            IEnumerator enumerator = enumerable.GetEnumerator();
+            using IDisposable? enumerator1 = enumerator as IDisposable;
+            bool start = true;
+            
+            while (enumerator.MoveNext())
+            {
+                if (start)
+                    start = false;
+
+                else
+                {
+                    Console.ForegroundColor = _colors[1];
+                    Console.WriteLine(",");
+                }
+                
+                Console.Write("     ");
+                PrintAux(enumerator.Current,1);
+            }
+            
+            Console.ForegroundColor = _colors[0];
+            Console.Write("\n}");
+        }
+        else
+        {
+            PrintAux(obj,0);
+        }
+        
+        if (endLine)
+            Console.WriteLine();
+        
+        Console.ResetColor();
+    }
+    
+    /// <summary>
+    /// Si aucun argument n'est donné en paramètre, un retour à la ligne est affiché.
+    /// </summary>
+    public static void Print()
+    {
+        Console.WriteLine();
+    }
 }
+
