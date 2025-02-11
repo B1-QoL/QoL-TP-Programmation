@@ -8,10 +8,10 @@ ArchiBuilder est un programme qui crée un squelette de TP à partir du sujet. I
 ```ArchiBuilder *lien Forge du TP*```  \
 Il faut mettre le **lien Forge** et non le lien du sujet.
 
-Pour ne pas cloner le dépôt git et créer le TP dans le dossier courant :
+Pour ne pas cloner le dépôt git et créer le TP dans le dossier courant : \
 ```ArchiBuilder -l *lien Forge du TP*```
 
-Pour ne pas créer le projet et juste ajouter les fichiers manquant dans le dossier courant :
+Pour ne pas créer le projet et juste ajouter les fichiers manquant dans le dossier courant : \
 ```ArchiBuilder -d *lien Forge du TP*```
 
 Si un fichier existe déjà, ArchiBuilder demandera s'il doit le réécrire où l'ignorer.
