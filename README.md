@@ -1,4 +1,22 @@
 # Fonctions et programmes facilitant les travaux pratiques de programmation C#.
+## ArchiBuilder : (bêta)
+ArchiBuilder est un programme qui crée un squelette de TP à partir du sujet. Il utilise des identifiants Forge pour cloner le dépôt git et récupérer le sujet.
+
+### Installation :
+
+### Utilisation :
+```ArchiBuilder *lien Forge du TP*```
+Il faut mettre le lien Forge et non le lien du sujet.
+
+Pour ne pas cloner le dépôt git et créer le TP dans le dossier courant :
+```ArchiBuilder -l *lien Forge du TP*```
+
+Pour ne pas créer le projet et juste ajouter les fichiers manquant dans le dossier courant :
+```ArchiBuilder -d *lien Forge du TP*```
+
+Si un fichier existe déjà, ArchiBuilder demandera s'il doit le réécrire où l'ignorer.
+
+
 ## Description de la bibliothèque :
 Comprend :
   - Une fonction d'affichage ;
@@ -18,4 +36,4 @@ Comprend :
 La moulinette ne vous autorisera pas son utilisation dans les fichiers autres que Program.cs.
 
 ### Notes :
-Les ```StringBuilder``` peuvent être remplacés par des ```string``` pour des petites chaînes de caractères.
+Les ```StringBuilder``` peuvent être remplacés par des ```string``` pour les petites chaînes de caractères.
