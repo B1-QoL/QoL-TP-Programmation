@@ -3,7 +3,7 @@
 Comprend :
   - Une fonction C# d'affichage.
 
-## Installation de la bibliothèque C# :
+## Installation de la bibliothèque :
 1) Télécharger le dossier bin :<br />
    ```git clone -n --depth=1 --filter=tree:0 https://github.com/B1-QoL/QoL-TP-Programmation.git ;```<br />
    ```cd QoL-TP-Programmation ;```<br />
@@ -14,4 +14,4 @@ Comprend :
 5) Ajouter ```using static B1.Affichage;``` dans les fichiers où vous en avez besoin.
 
 **ATTENTION : NE PAS OUBLIER D'EN RETIRER TOUTE MENTION AVANT DE SOUMETTRE !**\
-La moulinette ne vous autorisera pas son utilisation.
+La moulinette ne vous autorisera pas son utilisation dans les fichiers autres que Program.cs.
