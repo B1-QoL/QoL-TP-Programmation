@@ -1,7 +1,8 @@
 # Fonctions et programmes facilitant les travaux pratiques de programmation C#.
 ## Description de la bibliothèque :
 Comprend :
-  - Une fonction C# d'affichage.
+  - Une fonction d'affichage ;
+  - Une fonction de parsing.
 
 ## Installation de la bibliothèque :
 1) Télécharger le dossier bin :<br />
