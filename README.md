@@ -16,5 +16,5 @@ Comprend :
 **ATTENTION : NE PAS OUBLIER D'EN RETIRER TOUTE MENTION AVANT DE SOUMETTRE !**\
 La moulinette ne vous autorisera pas son utilisation dans les fichiers autres que Program.cs.
 
-# Notes :
+### Notes :
 Les ```StringBuilder``` peuvent être remplacés par des ```string``` pour des petites chaînes de caractères.
