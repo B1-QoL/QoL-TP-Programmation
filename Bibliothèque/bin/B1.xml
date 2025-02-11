@@ -9,7 +9,12 @@
             Fonctions d'affichage.
             </summary>
         </member>
-        <member name="M:B1.Affichage.Print``1(``0,System.Boolean,System.Boolean)">
+        <member name="F:B1.Affichage._colors">
+            <summary>
+            Liste des couleurs à utiliser pour les dimensions.
+            </summary>
+        </member>
+        <member name="M:B1.Affichage.Print``1(``0,System.Boolean,System.Boolean,System.Boolean,System.Collections.Generic.List{System.ConsoleColor})">
             <summary>
              Affiche dans la console un objet de n'importe quel type. Si l'objet est une collection ou un tuple, la fonction affiche tous les éléments imbriqués suivant cette règle :
              <list type="bullet">
@@ -17,7 +22,7 @@
              tuple => () ;
              </item>
              <item>
-             élément d'un dictionnaire => [] ;
+             éléments d'un dictionnaire => [] ;
              </item>
              <item>
              pour tout le reste => {}.
@@ -27,12 +32,25 @@
              <param name="obj">Objet à afficher. Il peut être de n'importe quel type.</param>
              <param name="colorBrackets">Colorie les différentes dimension de <c>obj</c> si sa valeur est <c>true</c>.</param>
              <param name="endLine">Ajoute ou non un retour à la ligne à la fin de l'affichage.</param>
-             <typeparam name="TAny">N'importe quel type.</typeparam>
+            <param name="newLineAtDim1">Retourne à la ligne entre chaques éléments de la première dimension.</param>
+            <param name="colors">Liste des couleurs à utiliser pour les dimensions.</param>
+            <typeparam name="T">N'importe quel type.</typeparam>
         </member>
-        <member name="M:B1.Affichage.Print(System.String)">
+        <member name="M:B1.Affichage.Print">
             <summary>
-            Affiche un retour à la ligne si rien n'est donné en paramètre.
+            Si aucun argument n'est donné en paramètre, un retour à la ligne est affiché.
             </summary>
+        </member>
+        <member name="M:B1.Parsing.BeaconParse(System.String,System.String,System.String,System.Boolean)">
+            <summary>
+            Méthode séparant une chaîne de caractères en fonction d'une balise de début et de fin.
+            </summary>
+            <param name="stringToParse">La chaîne de caractères à séparer.</param>
+            <param name="openingTag">La balise ouvrante.</param>
+            <param name="closingTag">La balise fermante.</param>
+            <param name="includeTags">Si <c>includeTags</c> vaut <c>false</c>, les balises seront retirées du résultat.</param>
+            <returns>Une <c>List&lt;string&gt;</c> avec tous les éléments trouvés entre les balises.</returns>
+            <exception cref="T:System.ArgumentException">Les balises ne peuvent être vides.</exception>
         </member>
     </members>
 </doc>
