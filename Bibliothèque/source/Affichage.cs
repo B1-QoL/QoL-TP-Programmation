@@ -92,7 +92,7 @@ public static class Affichage
                 {
                     PrintAux(tuple[i], color);
 
-                    if (i != length - 1)
+                    if (i != tuple.Length - 1)
                     {
                         Console.ForegroundColor = _colors[color % _colors.Count];
                         Console.Write(", ");
