@@ -84,13 +84,11 @@ public static class Affichage
                 break;
             }
             case ITuple tuple:
-            {
-                int length = tuple.Length;
-                
+            {             
                 Console.ForegroundColor = _colors[++color % _colors.Count];
                 Console.Write("(");
                 
-                for (int i = 0; i < length; i++)
+                for (int i = 0; i < tuple.Length; i++)
                 {
                     PrintAux(tuple[i], color);
 
