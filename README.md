@@ -1,5 +1,5 @@
 # Fonctions et programmes facilitant les travaux pratiques de programmation C#.
-## ArchiBuilder : (bêta)
+## ArchiBuilder : (bêta b1.0)
 ArchiBuilder est un programme qui crée un squelette de TP à partir du sujet. Il utilise des identifiants Forge pour cloner le dépôt git et récupérer le sujet.
 
 ### Installation :
