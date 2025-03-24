@@ -8,7 +8,7 @@ ArchiBuilder est un programme qui crée un squelette de TP à partir du sujet. I
  ```git sparse-checkout set --no-cone ArchiBuilder/bin ;```<br />
  ```git checkout```
 
- Sous GNU/Linux, il faut ensuite ajouter les droits d'exécutions (``chmod +x ArchiBuilder``).
+ Sous GNU/Linux, il faut ensuite ajouter les droits d'exécution (``chmod +x ArchiBuilder``).
    
 ### Utilisation :
 ```ArchiBuilder *lien Forge du TP*```  \
