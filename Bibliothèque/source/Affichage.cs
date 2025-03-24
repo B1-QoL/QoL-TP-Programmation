@@ -42,7 +42,7 @@ public static class Affichage
                     b = true;
 
                     object? item = enumerator.Current;
-
+                    
                     switch (item)
                     {
                         case null:
@@ -50,25 +50,9 @@ public static class Affichage
                             Console.Write("null");
                             break;
                         
-                        case not null when item.GetType().IsGenericType && 
-                                           item.GetType().GetGenericTypeDefinition() == typeof(KeyValuePair<,>):
-                            Console.ForegroundColor = _colors[++color % _colors.Count];
-                            Console.Write("[");
-                            
-                            PrintAux(item.GetType().GetProperty("Key")!.GetValue(item), color);
-                            
-                            Console.ForegroundColor = _colors[color % _colors.Count];
-                            Console.Write(", ");
-                            
-                            PrintAux(item.GetType().GetProperty("Value")!.GetValue(item), color);
-                            
-                            Console.ForegroundColor = _colors[color % _colors.Count];
-                            Console.Write("]");
-                            --color;
-                            break;
-                        
-                        case IEnumerable inCol:
-                            PrintAux(inCol, color);
+                        case IEnumerable: case ITuple: case object when item.GetType().IsGenericType && 
+                                                                        item.GetType().GetGenericTypeDefinition() == typeof(KeyValuePair<,>):
+                            PrintAux(item, color);
                             break;
                         
                         default:
@@ -84,15 +68,17 @@ public static class Affichage
                 break;
             }
             case ITuple tuple:
-            {             
+            {
+                int length = tuple.Length;
+                
                 Console.ForegroundColor = _colors[++color % _colors.Count];
                 Console.Write("(");
                 
-                for (int i = 0; i < tuple.Length; i++)
+                for (int i = 0; i < length; i++)
                 {
                     PrintAux(tuple[i], color);
 
-                    if (i != tuple.Length - 1)
+                    if (i != length - 1)
                     {
                         Console.ForegroundColor = _colors[color % _colors.Count];
                         Console.Write(", ");
@@ -105,6 +91,24 @@ public static class Affichage
                 break;
                 
             }
+            
+            case object when obj.GetType().IsGenericType && 
+                    obj.GetType().GetGenericTypeDefinition() == typeof(KeyValuePair<,>):
+                Console.ForegroundColor = _colors[++color % _colors.Count];
+                Console.Write("[");
+                            
+                PrintAux(obj.GetType().GetProperty("Key")!.GetValue(obj), color);
+                            
+                Console.ForegroundColor = _colors[color % _colors.Count];
+                Console.Write(", ");
+                            
+                PrintAux(obj.GetType().GetProperty("Value")!.GetValue(obj), color);
+                            
+                Console.ForegroundColor = _colors[color % _colors.Count];
+                Console.Write("]");
+                --color;
+                break;
+            
             default:
                 Console.ForegroundColor = _colors[color % _colors.Count];
                 Console.Write(obj);
@@ -148,7 +152,7 @@ public static class Affichage
         }
         else
         {
-            _colors = new List<ConsoleColor> {ConsoleColor.Gray};
+            _colors = new List<ConsoleColor> {Console.ForegroundColor};
         }
 
         if (newLineAtDim1 && obj is IEnumerable enumerable)
@@ -180,7 +184,7 @@ public static class Affichage
         }
         else
         {
-            PrintAux(obj,0);
+            PrintAux(obj, -1);
         }
         
         if (endLine)
@@ -197,4 +201,3 @@ public static class Affichage
         Console.WriteLine();
     }
 }
-
