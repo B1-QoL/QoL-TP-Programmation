@@ -12,7 +12,7 @@ ArchiBuilder est un programme qui crée un squelette de TP à partir du sujet. I
    
 ### Utilisation :
 ```ArchiBuilder *lien Forge du TP*```  \
-Il faut mettre le **lien Forge** et non le lien du sujet.
+Il faut mettre le **lien Forge** et non le lien du sujet. Par exemple : _https://intra.forge.ecole.fr/ecole-prepa-computer-science/reference-TP/root/reference-TP_.
 
 Pour ne pas cloner le dépôt git et créer le TP dans le dossier courant : \
 ```ArchiBuilder -l *lien Forge du TP*```
