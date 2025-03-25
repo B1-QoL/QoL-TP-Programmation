@@ -1,14 +1,14 @@
 # Fonctions et programmes facilitant les travaux pratiques de programmation C#.
-## ArchiBuilder : (bêta b1.0)
+## ArchiBuilder (v1.0) :
 ArchiBuilder est un programme qui crée un squelette de TP à partir du sujet. Il utilise des identifiants Forge pour cloner le dépôt git et récupérer le sujet.
 
-### Installation :
+### Installation (GNU/Linux) :
  ```git clone -n --depth=1 --filter=tree:0 https://github.com/B1-QoL/QoL-TP-Programmation.git ;```<br />
  ```cd QoL-TP-Programmation ;```<br />
  ```git sparse-checkout set --no-cone ArchiBuilder/bin ;```<br />
  ```git checkout```
 
- Sous GNU/Linux, il faut ensuite ajouter les droits d'exécution (``chmod +x ArchiBuilder``).
+ Il faut ensuite ajouter les droits d'exécution (``chmod +x ArchiBuilder``).
    
 ### Utilisation :
 ```ArchiBuilder *lien Forge du TP*```  \
