@@ -12,7 +12,7 @@ public partial class ArchiBuilder
 
     private static void CloneB1Dll() 
     {
-        if (Directory.Exists("../QoL-TP-Programmation")) return;
+        if (File.Exists("../QoL-TP-Programmation/Bibliothèque/bin/B1.dll")) return;
 
 
         Console.WriteLine("Clonage de B1.dll...");
