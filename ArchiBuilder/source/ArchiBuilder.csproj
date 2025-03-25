@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <TargetFrameworks>net7.0</TargetFrameworks>
+        <OutputType>Exe</OutputType>
+    </PropertyGroup>
+
+
+    <PropertyGroup Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))'">
+        <DefineConstants>LINUX;$(DefineConstants)</DefineConstants>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))'">
+        <DefineConstants>WINDOWS;$(DefineConstants)</DefineConstants>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <Reference Include="B1">
+        <HintPath>..\QoL-TP-Programmation\Bibliothèque\bin\B1.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+</Project>
